@@ -35,8 +35,14 @@ def load_settings() -> Settings:
     db_path_raw = os.getenv("LOCAL_NEXUS_DB_PATH", "data/local_nexus.db")
     db_path = (project_root / db_path_raw).resolve() if not Path(db_path_raw).is_absolute() else Path(db_path_raw)
 
-    host = os.getenv("LOCAL_NEXUS_HOST", "127.0.0.1")
-    port = _to_int(os.getenv("LOCAL_NEXUS_PORT"), 5010)
+    # Deployment-friendly defaults:
+    # - Platforms like Railway provide PORT; services must bind 0.0.0.0:$PORT.
+    platform_port = os.getenv("PORT")
+    host_default = "0.0.0.0" if platform_port else "127.0.0.1"
+    host = os.getenv("LOCAL_NEXUS_HOST", host_default)
+
+    port_raw = os.getenv("LOCAL_NEXUS_PORT") or platform_port
+    port = _to_int(port_raw, 5010)
     token = os.getenv("LOCAL_NEXUS_TOKEN") or None
 
     port_range_start = _to_int(os.getenv("LOCAL_NEXUS_PORT_RANGE_START"), 3000)
