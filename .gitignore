@@ -1,0 +1,20 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+
+# Local registry + logs
+data/*.db
+data/*.sqlite
+data/logs/*.log
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Python build artifacts
+dist/
+build/
+*.egg-info/
+

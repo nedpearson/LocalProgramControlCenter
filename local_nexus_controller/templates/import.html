@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Import • Local Nexus Controller{% endblock %}
+
+{% block content %}
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-semibold">Import Bundle</h1>
+      <p class="text-slate-400 text-sm mt-1">
+        Paste a JSON bundle to auto-register a new program (service + optional database + key references).
+      </p>
+    </div>
+    <div class="text-sm text-slate-300">
+      <a class="underline hover:text-white" href="/api/import/bundle-template" target="_blank">View template</a>
+    </div>
+  </div>
+
+  <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <section class="rounded-xl border border-slate-800 bg-slate-900/30 p-4">
+      <h2 class="font-semibold">Paste bundle JSON</h2>
+      <textarea
+        id="bundle"
+        class="mt-3 w-full h-96 rounded-lg border border-slate-800 bg-slate-950 p-3 font-mono text-xs text-slate-100"
+        placeholder='{"service":{...},"database":{...},"keys":[...]}'
+      ></textarea>
+      <div class="mt-3 flex gap-2">
+        <button class="btn" onclick="lncImportBundle()">Import</button>
+        <button class="btn" onclick="lncLoadTemplate()">Load template</button>
+        <button class="btn" onclick="document.getElementById('bundle').value=''">Clear</button>
+      </div>
+      <p class="mt-3 text-xs text-slate-500">
+        If you set a token, click “Token” in the header first (stored in your browser localStorage).
+      </p>
+    </section>
+
+    <section class="rounded-xl border border-slate-800 bg-slate-900/30 p-4">
+      <h2 class="font-semibold">Result</h2>
+      <pre id="result" class="mt-3 rounded-lg border border-slate-800 bg-slate-950 p-3 text-xs whitespace-pre-wrap"></pre>
+      <p class="mt-3 text-xs text-slate-500">
+        After import, visit Services to control the program.
+      </p>
+    </section>
+  </div>
+{% endblock %}

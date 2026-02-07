@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Services • Local Nexus Controller{% endblock %}
+
+{% block content %}
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-semibold">Service Explorer</h1>
+      <p class="text-slate-400 text-sm mt-1">All registered services with controls and drill-downs.</p>
+    </div>
+    <div class="text-sm text-slate-400">
+      Tip: use Import to auto-register new programs.
+    </div>
+  </div>
+
+  <div class="mt-6 overflow-x-auto rounded-xl border border-slate-800">
+    <table class="min-w-full text-sm">
+      <thead class="bg-slate-900/60 text-slate-300">
+        <tr>
+          <th class="text-left px-4 py-3">Name</th>
+          <th class="text-left px-4 py-3">Category</th>
+          <th class="text-left px-4 py-3">Port</th>
+          <th class="text-left px-4 py-3">Status</th>
+          <th class="text-left px-4 py-3">URL</th>
+          <th class="text-left px-4 py-3">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-800">
+        {% for s in services %}
+        <tr class="bg-slate-950">
+          <td class="px-4 py-3">
+            <a class="underline hover:text-white" href="/services/{{ s.id }}">{{ s.name }}</a>
+            {% if s.description %}
+              <div class="text-xs text-slate-500 mt-1 line-clamp-2">{{ s.description }}</div>
+            {% endif %}
+          </td>
+          <td class="px-4 py-3 text-slate-300">{{ s.category }}</td>
+          <td class="px-4 py-3 text-slate-300">{{ s.port if s.port is not none else "—" }}</td>
+          <td class="px-4 py-3">
+            {% if s.status == "running" %}
+              <span class="rounded-full bg-emerald-900/40 border border-emerald-800 px-2 py-1 text-emerald-200">running</span>
+            {% elif s.status == "error" %}
+              <span class="rounded-full bg-rose-900/40 border border-rose-800 px-2 py-1 text-rose-200">error</span>
+            {% else %}
+              <span class="rounded-full bg-slate-900/40 border border-slate-800 px-2 py-1 text-slate-300">stopped</span>
+            {% endif %}
+          </td>
+          <td class="px-4 py-3">
+            {% if s.local_url %}
+              <a class="underline text-slate-300 hover:text-white" href="{{ s.local_url }}" target="_blank">{{ s.local_url }}</a>
+            {% else %}
+              <span class="text-slate-500">—</span>
+            {% endif %}
+          </td>
+          <td class="px-4 py-3">
+            <div class="flex flex-wrap gap-2">
+              <button class="btn" onclick="lncServiceAction('{{ s.id }}','start')">Start</button>
+              <button class="btn" onclick="lncServiceAction('{{ s.id }}','stop')">Stop</button>
+              <button class="btn" onclick="lncServiceAction('{{ s.id }}','restart')">Restart</button>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

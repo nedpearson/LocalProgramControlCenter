@@ -1,0 +1,175 @@
+[
+  {
+    "service": {
+      "name": "Local Nexus Controller",
+      "description": "Unified controller for local programs/services: registry, ports, keys, dashboards, and process control.",
+      "category": "platform",
+      "tags": ["controller", "dashboard", "registry"],
+      "tech_stack": ["python", "fastapi", "sqlmodel", "sqlite"],
+      "dependencies": [],
+      "config_paths": ["C:/Users/nedpe/LocalNexusController/.env"],
+      "port": 5010,
+      "local_url": "http://127.0.0.1:5010",
+      "healthcheck_url": "http://127.0.0.1:5010/api/summary",
+      "working_directory": "C:/Users/nedpe/LocalNexusController",
+      "start_command": "python -m local_nexus_controller",
+      "stop_command": "",
+      "restart_command": "",
+      "database_id": null,
+      "database_connection_string": "sqlite:///./data/local_nexus.db",
+      "database_schema_overview": "Tables: service, database, keyref"
+    },
+    "database": {
+      "database_name": "lnc_registry",
+      "type": "sqlite",
+      "host": "localhost",
+      "port": null,
+      "username_env": null,
+      "password_env": null,
+      "connection_string": "sqlite:///./data/local_nexus.db",
+      "schema_overview": "Tables: service, database, keyref"
+    },
+    "keys": [
+      {
+        "key_name": "Controller write token (optional)",
+        "env_var": "LOCAL_NEXUS_TOKEN",
+        "description": "If set, required for write actions via X-Local-Nexus-Token header"
+      }
+    ],
+    "requested_port": 5010,
+    "auto_assign_port": false,
+    "auto_create_db": true,
+    "meta": { "source": "existing-programs" }
+  },
+  {
+    "service": {
+      "name": "Eicher Monorepo Backend (Node HTTP)",
+      "description": "Simple Node HTTP API that returns JSON { message: 'Hello from backend' }.",
+      "category": "services",
+      "tags": ["node", "http", "api"],
+      "tech_stack": ["nodejs"],
+      "dependencies": [],
+      "config_paths": [],
+      "port": 3000,
+      "local_url": "http://127.0.0.1:3000",
+      "healthcheck_url": "http://127.0.0.1:3000",
+      "working_directory": "C:/Users/nedpe/backend",
+      "start_command": "npm start",
+      "stop_command": "",
+      "restart_command": "",
+      "database_id": null,
+      "database_connection_string": null,
+      "database_schema_overview": null
+    },
+    "database": null,
+    "keys": [],
+    "requested_port": 3000,
+    "auto_assign_port": false,
+    "auto_create_db": false,
+    "meta": { "source": "C:/Users/nedpe/backend" }
+  },
+  {
+    "service": {
+      "name": "Eicher Monorepo Frontend (Vite)",
+      "description": "Vite frontend that fetches from the backend and displays the backend message.",
+      "category": "apps",
+      "tags": ["vite", "frontend"],
+      "tech_stack": ["nodejs", "vite"],
+      "dependencies": ["Eicher Monorepo Backend (Node HTTP)"],
+      "config_paths": [],
+      "port": 5173,
+      "local_url": "http://127.0.0.1:5173",
+      "healthcheck_url": "http://127.0.0.1:5173",
+      "working_directory": "C:/Users/nedpe/frontend",
+      "start_command": "npm run dev -- --host {HOST} --port {PORT} --strictPort",
+      "stop_command": "",
+      "restart_command": "",
+      "database_id": null,
+      "database_connection_string": null,
+      "database_schema_overview": null
+    },
+    "database": null,
+    "keys": [],
+    "requested_port": 5173,
+    "auto_assign_port": false,
+    "auto_create_db": false,
+    "meta": { "source": "C:/Users/nedpe/frontend" }
+  },
+  {
+    "service": {
+      "name": "Job Tracker (Next.js + Prisma)",
+      "description": "Job hunting app: track jobs/apps, match scoring, company research, AI writing, Gmail integration (optional).",
+      "category": "apps",
+      "tags": ["nextjs", "prisma", "postgres", "auth"],
+      "tech_stack": ["nodejs", "nextjs", "typescript", "tailwind", "prisma", "postgres"],
+      "dependencies": [],
+      "config_paths": ["C:/Users/nedpe/job-tracker/.env"],
+      "port": 3000,
+      "local_url": "http://127.0.0.1:3000",
+      "healthcheck_url": "http://127.0.0.1:3000/api/version",
+      "working_directory": "C:/Users/nedpe/job-tracker",
+      "start_command": "npm run dev -- -p {PORT}",
+      "stop_command": "",
+      "restart_command": "",
+      "database_id": null,
+      "database_connection_string": "${DATABASE_URL}",
+      "database_schema_overview": "Postgres via Prisma. Core tables include: User, Profile, Skill, Company, Job, Application, OutreachEmail, Contact, Account, Session."
+    },
+    "database": {
+      "database_name": "jobtracker",
+      "type": "postgres",
+      "host": "localhost",
+      "port": 5432,
+      "username_env": "PGUSER",
+      "password_env": "PGPASSWORD",
+      "connection_string": "postgresql://${PGUSER}:${PGPASSWORD}@${PGHOST}:${PGPORT}/${PGDATABASE}?schema=public",
+      "schema_overview": "Prisma schema includes: User, Account, Session, VerificationToken, Profile, Skill, Company, Job, Application, OutreachEmail, Contact, ApplicationContact (and enums)."
+    },
+    "keys": [
+      { "key_name": "Database URL", "env_var": "DATABASE_URL", "description": "Postgres connection string (required)" },
+      { "key_name": "Auth secret", "env_var": "AUTH_SECRET", "description": "Auth.js secret (required at runtime)" },
+      { "key_name": "Auth base URL", "env_var": "AUTH_URL", "description": "Typically http://localhost:3000 in dev" },
+      { "key_name": "Google OAuth client id", "env_var": "AUTH_GOOGLE_ID", "description": "Optional (Gmail integration)" },
+      { "key_name": "Google OAuth secret", "env_var": "AUTH_GOOGLE_SECRET", "description": "Optional (Gmail integration)" },
+      { "key_name": "OpenAI API key", "env_var": "OPENAI_API_KEY", "description": "Optional AI features" },
+      { "key_name": "SerpAPI key", "env_var": "SERPAPI_API_KEY", "description": "Optional job search connector" },
+      { "key_name": "PG host", "env_var": "PGHOST", "description": "Optional alternative DB config (Railway-style)" },
+      { "key_name": "PG port", "env_var": "PGPORT", "description": "Optional alternative DB config (Railway-style)" },
+      { "key_name": "PG user", "env_var": "PGUSER", "description": "Optional alternative DB config (Railway-style)" },
+      { "key_name": "PG password", "env_var": "PGPASSWORD", "description": "Optional alternative DB config (Railway-style)" },
+      { "key_name": "PG database", "env_var": "PGDATABASE", "description": "Optional alternative DB config (Railway-style)" }
+    ],
+    "requested_port": 3000,
+    "auto_assign_port": false,
+    "auto_create_db": true,
+    "meta": { "source": "C:/Users/nedpe/job-tracker" }
+  },
+  {
+    "service": {
+      "name": "PearsonNexusAI Prototype (Vite)",
+      "description": "React + TypeScript + Vite prototype for PearsonNexusAI UI modules.",
+      "category": "apps",
+      "tags": ["react", "vite", "prototype"],
+      "tech_stack": ["nodejs", "react", "typescript", "vite"],
+      "dependencies": [],
+      "config_paths": [],
+      "port": 5199,
+      "local_url": "http://127.0.0.1:5199",
+      "healthcheck_url": "http://127.0.0.1:5199",
+      "working_directory": "C:/Users/nedpe/Documents/PearsonNexusAI/prototype",
+      "start_command": "npm run dev -- --host {HOST} --port {PORT} --strictPort",
+      "stop_command": "",
+      "restart_command": "",
+      "database_id": null,
+      "database_connection_string": null,
+      "database_schema_overview": null
+    },
+    "database": null,
+    "keys": [],
+    "requested_port": 5199,
+    "auto_assign_port": false,
+    "auto_create_db": false,
+    "meta": { "source": "C:/Users/nedpe/Documents/PearsonNexusAI/prototype" }
+  }
+]
+

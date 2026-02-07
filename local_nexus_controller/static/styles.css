@@ -1,0 +1,12 @@
+.btn {
+  border: 1px solid rgb(51 65 85); /* slate-700 */
+  background: rgba(2, 6, 23, 0.4); /* slate-950 */
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.5rem;
+  color: rgb(226 232 240); /* slate-200 */
+  font-size: 0.875rem;
+}
+
+.btn:hover {
+  background: rgba(15, 23, 42, 0.8); /* slate-900 */
+}

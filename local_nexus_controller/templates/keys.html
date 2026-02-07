@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Keys • Local Nexus Controller{% endblock %}
+
+{% block content %}
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-semibold">Keys / Secrets Explorer</h1>
+      <p class="text-slate-400 text-sm mt-1">References only (env var names). Never store real secrets here.</p>
+    </div>
+    <div class="text-sm">
+      <a class="underline text-slate-300 hover:text-white" href="/api/import/env-example" target="_blank">Generate combined .env.example</a>
+    </div>
+  </div>
+
+  <div class="mt-6 overflow-x-auto rounded-xl border border-slate-800">
+    <table class="min-w-full text-sm">
+      <thead class="bg-slate-900/60 text-slate-300">
+        <tr>
+          <th class="text-left px-4 py-3">Env var</th>
+          <th class="text-left px-4 py-3">Key name</th>
+          <th class="text-left px-4 py-3">Service</th>
+          <th class="text-left px-4 py-3">Description</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-800">
+        {% for k in keys %}
+          {% set svc = services.get(k.service_id) %}
+          <tr class="bg-slate-950">
+            <td class="px-4 py-3 text-slate-200 font-mono text-xs">{{ k.env_var }}</td>
+            <td class="px-4 py-3 text-slate-200">{{ k.key_name }}</td>
+            <td class="px-4 py-3">
+              {% if svc %}
+                <a class="underline hover:text-white" href="/services/{{ svc.id }}">{{ svc.name }}</a>
+              {% else %}
+                <span class="text-slate-500">—</span>
+              {% endif %}
+            </td>
+            <td class="px-4 py-3 text-slate-300">{{ k.description }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

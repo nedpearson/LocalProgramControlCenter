@@ -1,0 +1,144 @@
+[
+  {
+    "service": {
+      "name": "Local Nexus Controller",
+      "description": "Unified controller for all local programs/services: registry, ports, keys, dashboards, and process control.",
+      "category": "platform",
+      "tags": ["controller", "dashboard", "registry"],
+      "tech_stack": ["python", "fastapi", "sqlmodel", "sqlite"],
+      "dependencies": [],
+      "config_paths": ["C:/Users/nedpe/LocalNexusController/.env"],
+      "port": 5010,
+      "local_url": "http://127.0.0.1:5010",
+      "healthcheck_url": "http://127.0.0.1:5010/api/summary",
+      "working_directory": "C:/Users/nedpe/LocalNexusController",
+      "start_command": "python -m local_nexus_controller",
+      "stop_command": "",
+      "restart_command": "",
+      "database_id": null,
+      "database_connection_string": "sqlite:///./data/local_nexus.db",
+      "database_schema_overview": "Tables: service, database, keyref"
+    },
+    "database": {
+      "database_name": "lnc_registry",
+      "type": "sqlite",
+      "host": "localhost",
+      "port": null,
+      "username_env": null,
+      "password_env": null,
+      "connection_string": "sqlite:///./data/local_nexus.db",
+      "schema_overview": "Tables: service(id,name,port,status,...), database(...), keyref(...)."
+    },
+    "keys": [],
+    "requested_port": 5010,
+    "auto_assign_port": false,
+    "auto_create_db": true,
+    "meta": { "seed": true }
+  },
+  {
+    "service": {
+      "name": "Job Tracker (frontend)",
+      "description": "Local UI for tracking applications, interviews, and tasks.",
+      "category": "apps",
+      "tags": ["react", "vite", "ui"],
+      "tech_stack": ["node", "react", "vite", "typescript"],
+      "dependencies": ["Job Tracker (backend)"],
+      "config_paths": ["C:/Users/nedpe/job-tracker/.env"],
+      "port": 5173,
+      "local_url": "http://127.0.0.1:5173",
+      "healthcheck_url": "http://127.0.0.1:5173",
+      "working_directory": "C:/Users/nedpe/job-tracker",
+      "start_command": "npm run dev",
+      "stop_command": "",
+      "restart_command": "",
+      "database_id": null,
+      "database_connection_string": null,
+      "database_schema_overview": null
+    },
+    "database": null,
+    "keys": [
+      { "key_name": "Sentry DSN", "env_var": "SENTRY_DSN", "description": "Optional error reporting (frontend)" }
+    ],
+    "requested_port": 5173,
+    "auto_assign_port": false,
+    "auto_create_db": false,
+    "meta": { "seed": true }
+  },
+  {
+    "service": {
+      "name": "Job Tracker (backend)",
+      "description": "Local API backing the Job Tracker UI.",
+      "category": "services",
+      "tags": ["api", "backend"],
+      "tech_stack": ["node", "express"],
+      "dependencies": [],
+      "config_paths": ["C:/Users/nedpe/backend/.env"],
+      "port": 3001,
+      "local_url": "http://127.0.0.1:3001",
+      "healthcheck_url": "http://127.0.0.1:3001/health",
+      "working_directory": "C:/Users/nedpe/backend",
+      "start_command": "npm run dev",
+      "stop_command": "",
+      "restart_command": "",
+      "database_id": null,
+      "database_connection_string": "postgresql://${JOBTRACKER_DB_USER}:${JOBTRACKER_DB_PASSWORD}@localhost:5432/job_tracker",
+      "database_schema_overview": "tables: users, applications, interviews, tasks (example)"
+    },
+    "database": {
+      "database_name": "job_tracker",
+      "type": "postgres",
+      "host": "localhost",
+      "port": 5432,
+      "username_env": "JOBTRACKER_DB_USER",
+      "password_env": "JOBTRACKER_DB_PASSWORD",
+      "connection_string": "postgresql://${JOBTRACKER_DB_USER}:${JOBTRACKER_DB_PASSWORD}@localhost:5432/job_tracker",
+      "schema_overview": "tables: users, applications, interviews, tasks (example)"
+    },
+    "keys": [
+      { "key_name": "DB user", "env_var": "JOBTRACKER_DB_USER", "description": "Postgres username" },
+      { "key_name": "DB password", "env_var": "JOBTRACKER_DB_PASSWORD", "description": "Postgres password" }
+    ],
+    "requested_port": 3001,
+    "auto_assign_port": false,
+    "auto_create_db": true,
+    "meta": { "seed": true }
+  },
+  {
+    "service": {
+      "name": "Notes API (sample)",
+      "description": "Sample local FastAPI service to demonstrate auto-assigned ports and key refs.",
+      "category": "services",
+      "tags": ["sample", "fastapi"],
+      "tech_stack": ["python", "fastapi"],
+      "dependencies": [],
+      "config_paths": ["C:/path/to/notes-api/.env"],
+      "port": null,
+      "local_url": null,
+      "healthcheck_url": null,
+      "working_directory": "C:/path/to/notes-api",
+      "start_command": "python -m uvicorn app.main:app --host {HOST} --port {PORT}",
+      "stop_command": "",
+      "restart_command": "",
+      "database_id": null,
+      "database_connection_string": "sqlite:///./data/notes.db",
+      "database_schema_overview": "tables: notes(id,title,body,created_at)"
+    },
+    "database": {
+      "database_name": "notes_api",
+      "type": "sqlite",
+      "host": "localhost",
+      "port": null,
+      "username_env": null,
+      "password_env": null,
+      "connection_string": "sqlite:///./data/notes.db",
+      "schema_overview": "tables: notes(id,title,body,created_at)"
+    },
+    "keys": [
+      { "key_name": "Notes API admin token", "env_var": "NOTES_ADMIN_TOKEN", "description": "Example admin token reference" }
+    ],
+    "requested_port": null,
+    "auto_assign_port": true,
+    "auto_create_db": true,
+    "meta": { "seed": true }
+  }
+]

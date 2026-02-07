@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block title %}{{ service.name }} • Local Nexus Controller{% endblock %}
+
+{% block content %}
+  <div class="flex items-start justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-semibold">{{ service.name }}</h1>
+      <div class="text-sm text-slate-400 mt-1">{{ service.description }}</div>
+      <div class="text-xs text-slate-500 mt-2">ID: {{ service.id }}</div>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <button class="btn" onclick="lncServiceAction('{{ service.id }}','start', true)">Start</button>
+      <button class="btn" onclick="lncServiceAction('{{ service.id }}','stop', true)">Stop</button>
+      <button class="btn" onclick="lncServiceAction('{{ service.id }}','restart', true)">Restart</button>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+    <section class="rounded-xl border border-slate-800 bg-slate-900/30 p-4 lg:col-span-2">
+      <h2 class="font-semibold">Metadata</h2>
+      <dl class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+        <div>
+          <dt class="text-slate-500">Status</dt>
+          <dd class="mt-1 text-slate-200">{{ service.status }}</dd>
+        </div>
+        <div>
+          <dt class="text-slate-500">Category</dt>
+          <dd class="mt-1 text-slate-200">{{ service.category }}</dd>
+        </div>
+        <div>
+          <dt class="text-slate-500">Port</dt>
+          <dd class="mt-1 text-slate-200">
+            {{ service.port if service.port is not none else "—" }}
+            {% if service.port is not none %}
+              {% if port_in_use and service.status != "running" %}
+                <span class="ml-2 text-amber-200">(in use)</span>
+              {% endif %}
+            {% endif %}
+          </dd>
+        </div>
+        <div>
+          <dt class="text-slate-500">Local URL</dt>
+          <dd class="mt-1">
+            {% if service.local_url %}
+              <a class="underline text-slate-300 hover:text-white" href="{{ service.local_url }}" target="_blank">{{ service.local_url }}</a>
+            {% else %}
+              <span class="text-slate-500">—</span>
+            {% endif %}
+          </dd>
+        </div>
+        <div class="sm:col-span-2">
+          <dt class="text-slate-500">Tech stack</dt>
+          <dd class="mt-1 text-slate-200">
+            {% if service.tech_stack and service.tech_stack|length > 0 %}
+              {{ service.tech_stack|join(", ") }}
+            {% else %}
+              <span class="text-slate-500">—</span>
+            {% endif %}
+          </dd>
+        </div>
+        <div class="sm:col-span-2">
+          <dt class="text-slate-500">Tags</dt>
+          <dd class="mt-1 text-slate-200">
+            {% if service.tags and service.tags|length > 0 %}
+              {{ service.tags|join(", ") }}
+            {% else %}
+              <span class="text-slate-500">—</span>
+            {% endif %}
+          </dd>
+        </div>
+        <div class="sm:col-span-2">
+          <dt class="text-slate-500">Dependencies</dt>
+          <dd class="mt-1 text-slate-200">
+            {% if service.dependencies and service.dependencies|length > 0 %}
+              {{ service.dependencies|join(", ") }}
+            {% else %}
+              <span class="text-slate-500">—</span>
+            {% endif %}
+          </dd>
+        </div>
+      </dl>
+
+      <h3 class="font-semibold mt-6">Commands</h3>
+      <div class="mt-3 space-y-3 text-sm">
+        <div>
+          <div class="text-slate-500 text-xs">Working directory</div>
+          <pre class="mt-1 rounded-lg border border-slate-800 bg-slate-950 p-3 overflow-x-auto">{{ service.working_directory or "" }}</pre>
+        </div>
+        <div>
+          <div class="text-slate-500 text-xs">Start</div>
+          <pre class="mt-1 rounded-lg border border-slate-800 bg-slate-950 p-3 overflow-x-auto">{{ service.start_command }}</pre>
+        </div>
+        <div>
+          <div class="text-slate-500 text-xs">Stop</div>
+          <pre class="mt-1 rounded-lg border border-slate-800 bg-slate-950 p-3 overflow-x-auto">{{ service.stop_command }}</pre>
+        </div>
+        <div>
+          <div class="text-slate-500 text-xs">Restart</div>
+          <pre class="mt-1 rounded-lg border border-slate-800 bg-slate-950 p-3 overflow-x-auto">{{ service.restart_command }}</pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="rounded-xl border border-slate-800 bg-slate-900/30 p-4">
+      <h2 class="font-semibold">Database</h2>
+      {% if database %}
+        <div class="mt-3 text-sm text-slate-300">
+          <div><span class="text-slate-500">Name:</span> {{ database.database_name }}</div>
+          <div><span class="text-slate-500">Type:</span> {{ database.type }}</div>
+          <div class="mt-2 text-xs text-slate-500">Connection string (safe):</div>
+          <pre class="mt-1 rounded-lg border border-slate-800 bg-slate-950 p-3 overflow-x-auto text-xs">{{ database.connection_string or "" }}</pre>
+          <div class="mt-2 text-xs text-slate-500">Schema overview:</div>
+          <pre class="mt-1 rounded-lg border border-slate-800 bg-slate-950 p-3 overflow-x-auto text-xs">{{ database.schema_overview or "" }}</pre>
+        </div>
+      {% else %}
+        <p class="mt-3 text-sm text-slate-400">No database linked.</p>
+      {% endif %}
+
+      <h2 class="font-semibold mt-6">Keys / Secrets (references)</h2>
+      {% if keys and keys|length > 0 %}
+        <ul class="mt-3 space-y-2 text-sm">
+          {% for k in keys %}
+            <li class="rounded-lg border border-slate-800 bg-slate-950 px-3 py-2">
+              <div class="text-slate-200 font-medium">{{ k.env_var }}</div>
+              <div class="text-xs text-slate-500">{{ k.key_name }}{% if k.description %} — {{ k.description }}{% endif %}</div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="mt-3 text-sm text-slate-400">No key references recorded.</p>
+      {% endif %}
+    </section>
+  </div>
+
+  <section class="rounded-xl border border-slate-800 bg-slate-900/30 p-4 mt-6">
+    <div class="flex items-center justify-between">
+      <h2 class="font-semibold">Logs (tail)</h2>
+      <button class="btn" onclick="location.reload()">Refresh</button>
+    </div>
+    {% if service.log_path %}
+      <div class="text-xs text-slate-500 mt-1">{{ service.log_path }}</div>
+    {% endif %}
+    <pre class="mt-3 rounded-lg border border-slate-800 bg-slate-950 p-3 overflow-x-auto text-xs whitespace-pre-wrap">{{ log_tail }}</pre>
+  </section>
+{% endblock %}
