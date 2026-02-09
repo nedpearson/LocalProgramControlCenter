@@ -1,34 +1,40 @@
 {
   "repos": [
     {
-      "path": "C:/Users/nedpe/LocalNexusController",
-      "name": "LocalNexusController",
+      "path": "C:/Users/nedpe/LocalProgramControlCenter",
+      "name": "LocalProgramControlCenter",
       "expected_branch": "main",
       "expected_origin": "https://github.com/nedpearson/LocalProgramControlCenter.git"
     },
     {
-      "path": "C:/Users/nedpe/job-tracker",
-      "name": "job-tracker",
+      "path": "C:/Users/nedpe/JobTracker",
+      "name": "JobTracker",
       "expected_branch": "main",
       "expected_origin": "https://github.com/nedpearson/JobTracker.git"
     },
     {
-      "path": "C:/Users/nedpe/Documents/PearsonNexusAI/prototype",
-      "name": "prototype",
+      "path": "C:/Users/nedpe/New-Pearson_Nexus_AI",
+      "name": "New-Pearson_Nexus_AI",
       "expected_branch": "main",
       "expected_origin": "https://github.com/nedpearson/New-Pearson_Nexus_AI.git"
     },
     {
-      "path": "C:/Users/nedpe/backend",
-      "name": "local-nexus-sample-backend",
+      "path": "C:/Users/nedpe/Pearson_Nexus_AI_NEW",
+      "name": "Pearson_Nexus_AI_NEW",
       "expected_branch": "main",
-      "expected_origin": "https://github.com/nedpearson/LocalNexus-Sample-Backend.git"
+      "expected_origin": "https://github.com/nedpearson/Pearson_Nexus_AI_NEW.git"
     },
     {
-      "path": "C:/Users/nedpe/frontend",
-      "name": "local-nexus-sample-frontend",
+      "path": "C:/Users/nedpe/career-scout",
+      "name": "career-scout",
       "expected_branch": "main",
-      "expected_origin": "https://github.com/nedpearson/LocalNexus-Sample-Frontend.git"
+      "expected_origin": "https://github.com/nedpearson/career-scout.git"
+    },
+    {
+      "path": "C:/Users/nedpe/DocumentPresentationResearch_Assistant",
+      "name": "DocumentPresentationResearch_Assistant",
+      "expected_branch": "main",
+      "expected_origin": "https://github.com/nedpearson/DocumentPresentationResearch_Assistant.git"
     }
   ]
 }
