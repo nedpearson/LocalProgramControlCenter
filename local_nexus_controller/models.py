@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Optional
@@ -79,7 +77,7 @@ class Database(SQLModel, table=True):
     created_at: datetime = Field(default_factory=_now_utc)
     updated_at: datetime = Field(default_factory=_now_utc)
 
-    services: list[Service] = Relationship(back_populates="database")
+    services: list["Service"] = Relationship(back_populates="database")
 
 
 class KeyRef(SQLModel, table=True):
@@ -92,7 +90,7 @@ class KeyRef(SQLModel, table=True):
 
     created_at: datetime = Field(default_factory=_now_utc)
 
-    service: Service = Relationship(back_populates="keys")
+    service: "Service" = Relationship(back_populates="keys")
 
 
 # -----------------------

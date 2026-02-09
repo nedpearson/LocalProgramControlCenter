@@ -4,6 +4,11 @@ import json
 import sys
 from pathlib import Path
 
+# Ensure the repo root is importable even when running a script from /tools.
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
 from sqlmodel import Session
 
 from local_nexus_controller.db import engine, init_db

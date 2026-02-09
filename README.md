@@ -54,6 +54,37 @@ When you ask for a new program, you (and I) will produce an **Import Bundle JSON
 
 This ensures every new local program is automatically registered, categorized, assigned a port, and optionally assigned a database.
 
+## Isolation model (recommended)
+
+To keep your controller clean and prevent accidental coupling between programs:
+
+- **Each program lives in its own folder**
+- **Each folder is its own Cursor project**
+- **Each folder is its own Git repo**
+- The controller **never imports program code**. It only references programs by metadata:
+  - `working_directory`
+  - `start_command` / `stop_command` / `restart_command`
+  - ports + URLs + healthcheck URL
+  - key *references* (env var names only)
+
+### Per-program registration artifact
+
+Each program repo should include a small, versioned bundle file (recommended name: `local-nexus.bundle.json`) that matches the controller’s `ImportBundle` JSON shape.
+
+You can import it with:
+
+```powershell
+python .\tools\import_bundle.py C:\path\to\program\local-nexus.bundle.json
+```
+
+Or paste the JSON into Dashboard → **Import**.
+
+You can validate a bundle (and optionally normalize Windows paths) with:
+
+```powershell
+python .\tools\validate_bundle.py C:\path\to\program\local-nexus.bundle.json
+```
+
 ## Notes
 
 - The controller stores **only references** to secrets (e.g., `OPENAI_API_KEY`) and where they are used. It never stores secret values.
