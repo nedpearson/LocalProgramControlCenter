@@ -40,7 +40,7 @@ def dashboard(request: Request, session: Session = Depends(get_session)) -> HTML
 
         if svc.port is not None and is_port_in_use("127.0.0.1", int(svc.port)) and svc.status != "running":
             alerts.append(f"Port conflict: {svc.name} reserved {svc.port} but is not running.")
-        if not svc.start_command:
+        if not svc.start_command and (svc.category or "").lower() not in {"repo", "repos"}:
             alerts.append(f"Missing start_command: {svc.name}")
 
     session.commit()

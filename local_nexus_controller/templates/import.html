@@ -40,4 +40,203 @@
       </p>
     </section>
   </div>
+
+  <section class="mt-6 rounded-xl border border-slate-800 bg-slate-900/30 p-4">
+    <div class="flex items-start justify-between gap-4">
+      <div>
+        <h2 class="font-semibold">Import from GitHub</h2>
+        <p class="text-slate-400 text-sm mt-1">
+          Imports a bundle file (default <span class="font-mono text-slate-300">local-nexus.bundle.json</span>) directly from a GitHub repo.
+        </p>
+      </div>
+      <div class="flex gap-2 shrink-0">
+        <button class="btn" onclick="lncLoadGitHubRepos()">Load my repos</button>
+        <button class="btn" onclick="lncLoadGitHubBundles()">Load bundles</button>
+        <button class="btn" onclick="lncConnectGitHubMobile()">Connect GitHub (mobile)</button>
+        <button class="btn" onclick="lncPromptGitHubToken()">GitHub token</button>
+      </div>
+    </div>
+
+    <div id="ghRepoBrowser" class="mt-3 hidden rounded-lg border border-slate-800 bg-slate-950 p-3">
+      <div class="flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
+        <input
+          id="ghRepoFilter"
+          class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 font-mono text-xs text-slate-100"
+          placeholder="Filter repos (type to search)…"
+          oninput="lncFilterGitHubRepos()"
+        />
+        <div class="text-xs text-slate-400 shrink-0">
+          <span id="ghRepoCount">0</span> repos
+        </div>
+      </div>
+      <div
+        id="ghRepoList"
+        class="mt-3 max-h-64 overflow-auto rounded-lg border border-slate-800 bg-slate-950"
+      ></div>
+      <p class="mt-2 text-xs text-slate-500">
+        Click a repo to fill the fields below.
+      </p>
+    </div>
+
+    <div id="ghBundleBrowser" class="mt-3 hidden rounded-lg border border-slate-800 bg-slate-950 p-3">
+      <div class="flex items-center justify-between gap-3">
+        <div class="text-xs text-slate-400">
+          Bundles found: <span id="ghBundleCount">0</span>
+        </div>
+        <button class="btn" onclick="lncLoadGitHubBundles()">Refresh</button>
+      </div>
+      <div
+        id="ghBundleList"
+        class="mt-3 max-h-64 overflow-auto rounded-lg border border-slate-800 bg-slate-950"
+      ></div>
+      <p class="mt-2 text-xs text-slate-500">
+        One-click import uses the selected repo/ref and the bundle’s path.
+      </p>
+    </div>
+
+    <div class="mt-3 grid grid-cols-1 lg:grid-cols-3 gap-2">
+      <input
+        id="ghRepo"
+        class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 font-mono text-xs text-slate-100"
+        placeholder="owner/repo  (or https://github.com/owner/repo)"
+      />
+      <input
+        id="ghRef"
+        class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 font-mono text-xs text-slate-100"
+        placeholder="ref (branch/tag) e.g. main"
+      />
+      <input
+        id="ghPath"
+        class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 font-mono text-xs text-slate-100"
+        placeholder="path e.g. local-nexus.bundle.json"
+      />
+    </div>
+    <div class="mt-3 flex gap-2">
+      <button class="btn" onclick="lncImportFromGitHub()">Import from GitHub</button>
+      <button class="btn" onclick="lncFillGitHubDefaults()">Use defaults</button>
+      <button class="btn" onclick="lncCreateGitHubBundlePr()">Create bundle PR</button>
+      <button class="btn" onclick="lncCreateGitHubLocalizePr()">Localize PR</button>
+    </div>
+    <label class="mt-3 inline-flex items-center gap-2 text-xs text-slate-300 select-none">
+      <input id="ghNeedsLocalSetup" type="checkbox" class="accent-slate-200" checked />
+      Repo needs local setup (adds a flag in the generated bundle meta)
+    </label>
+    <p class="mt-2 text-xs text-slate-500">
+      Tip: you can paste a file URL like <span class="font-mono">https://github.com/owner/repo/blob/main/local-nexus.bundle.json</span> and ref/path will be auto-detected.
+      For private repos, click “GitHub token” and paste a GitHub PAT with repo read access (stored in your browser localStorage).
+    </p>
+  </section>
+
+  <section class="mt-6 rounded-xl border border-slate-800 bg-slate-900/30 p-4">
+    <h2 class="font-semibold">Merge two GitHub repos (copy into subfolder)</h2>
+    <p class="text-slate-400 text-sm mt-1">
+      Creates a PR in the destination repo that copies the source repo contents into a subfolder (no git history).
+    </p>
+
+    <div class="mt-3 grid grid-cols-1 lg:grid-cols-2 gap-2">
+      <input
+        id="mergeDestRepo"
+        class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 font-mono text-xs text-slate-100"
+        placeholder="Destination repo (owner/repo)"
+      />
+      <input
+        id="mergeSourceRepo"
+        class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 font-mono text-xs text-slate-100"
+        placeholder="Source repo (owner/repo)"
+      />
+    </div>
+    <div class="mt-2 grid grid-cols-1 lg:grid-cols-3 gap-2">
+      <input
+        id="mergeSourceRef"
+        class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 font-mono text-xs text-slate-100"
+        placeholder="Source ref (branch/tag) e.g. main"
+      />
+      <input
+        id="mergeDestBase"
+        class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 font-mono text-xs text-slate-100"
+        placeholder="Destination base branch (optional)"
+      />
+      <input
+        id="mergeDestSubdir"
+        class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 font-mono text-xs text-slate-100"
+        placeholder="Destination subfolder (optional) default: apps/sourceRepoName"
+      />
+    </div>
+    <div class="mt-3 flex flex-wrap gap-2">
+      <button class="btn" onclick="lncSetMergeDestFromSelected()">Use selected as destination</button>
+      <button class="btn" onclick="lncSetMergeSourceFromSelected()">Use selected as source</button>
+      <button class="btn" onclick="lncCreateGitHubMergePr()">Create merge PR</button>
+    </div>
+    <p class="mt-2 text-xs text-slate-500">
+      Default layout is <span class="font-mono">apps/&lt;sourceRepoName&gt;</span>. The PR also adds a simple master runner
+      (<span class="font-mono">tools/local-nexus/start-all.ps1</span>) that starts every app under <span class="font-mono">apps/*</span>.
+      Requires a GitHub token with write access to the destination repo. Large repos may be truncated/limited by GitHub API; results will show warnings.
+    </p>
+  </section>
+
+  <section class="mt-6 rounded-xl border border-slate-800 bg-slate-900/30 p-4">
+    <h2 class="font-semibold">Cursor fix loop (clone PR branch → fix → push)</h2>
+    <p class="text-slate-400 text-sm mt-1">
+      Clones a GitHub repo branch locally, opens it in Cursor, then commits and pushes your fixes back to the same PR branch.
+    </p>
+    <div class="mt-3 grid grid-cols-1 lg:grid-cols-2 gap-2">
+      <input
+        id="wsRepo"
+        class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 font-mono text-xs text-slate-100"
+        placeholder="Repo (owner/repo)"
+      />
+      <input
+        id="wsBranch"
+        class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 font-mono text-xs text-slate-100"
+        placeholder="Branch (e.g. local-nexus/merge-...)"
+      />
+    </div>
+    <div class="mt-2 grid grid-cols-1 lg:grid-cols-2 gap-2">
+      <input
+        id="wsPath"
+        class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 font-mono text-xs text-slate-100"
+        placeholder="Workspace path (filled after prepare)"
+      />
+      <input
+        id="wsCommitMessage"
+        class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 font-mono text-xs text-slate-100"
+        placeholder="Commit message (optional)"
+      />
+    </div>
+    <div class="mt-3 flex flex-wrap gap-2">
+      <button class="btn" onclick="lncFillWorkspaceFromLastPr()">Fill from last PR</button>
+      <button class="btn" onclick="lncPrepareWorkspace()">Prepare workspace</button>
+      <button class="btn" onclick="lncOpenWorkspaceInCursor()">Open in Cursor</button>
+      <button class="btn" onclick="lncPushWorkspaceFixes()">Push fixes</button>
+    </div>
+    <p class="mt-2 text-xs text-slate-500">
+      Requires Git for Windows + Cursor installed. Your GitHub token is used for clone/push but is not stored on disk.
+    </p>
+  </section>
+
+  <section class="mt-6 rounded-xl border border-slate-800 bg-slate-900/30 p-4">
+    <h2 class="font-semibold">Import all repos from your local GitHub folder</h2>
+    <p class="text-slate-400 text-sm mt-1">
+      Scans a folder for <span class="font-mono text-slate-300">local-nexus.bundle.json</span> files (recommended per-repo artifact) and imports them.
+      Optionally, it can also register any Git repos it finds (folders containing a <span class="font-mono text-slate-300">.git</span> directory).
+    </p>
+    <div class="mt-3 flex flex-col sm:flex-row gap-2">
+      <input
+        id="bundleRoot"
+        class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 font-mono text-xs text-slate-100"
+        placeholder="C:/Users/you/source/repos"
+      />
+      <div class="flex gap-2 shrink-0">
+        <button class="btn" onclick="lncImportBundlesFromFolder(false)">Import all</button>
+        <button class="btn" onclick="lncImportBundlesFromFolder(true)">Dry run</button>
+      </div>
+    </div>
+    <label class="mt-3 inline-flex items-center gap-2 text-xs text-slate-300 select-none">
+      <input id="includeGitRepos" type="checkbox" class="accent-slate-200" checked />
+      Include Git repos even without a bundle file
+    </label>
+    <p class="mt-2 text-xs text-slate-500">
+      Tip: this is fastest if each repo has a <span class="font-mono">local-nexus.bundle.json</span> at its root.
+    </p>
+  </section>
 {% endblock %}

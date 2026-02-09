@@ -17,8 +17,35 @@ function Write-WidgetLog([string]$projectRoot, [string]$message) {
   }
 }
 
+function Exit-WidgetLock {
+  try {
+    if ($script:WidgetMutex) {
+      try { $script:WidgetMutex.ReleaseMutex() } catch { }
+      try { $script:WidgetMutex.Dispose() } catch { }
+    }
+  } finally {
+    $script:WidgetMutex = $null
+  }
+}
+
 function Enter-WidgetLock {
   if ($env:LOCAL_NEXUS_WIDGET_FORCE -eq "1") { return $true }
+
+  # Prevent duplicate windows when multiple startup mechanisms trigger concurrently.
+  # A named mutex is atomic across processes; a lock file alone can race.
+  $mutexName = "Local\LocalNexusController.DashboardWidget"
+  $createdNew = $false
+  $mutex = New-Object System.Threading.Mutex($false, $mutexName, [ref]$createdNew)
+  try {
+    if (-not $mutex.WaitOne(0)) {
+      try { $mutex.Dispose() } catch { }
+      return $false
+    }
+    $script:WidgetMutex = $mutex
+  } catch {
+    try { $mutex.Dispose() } catch { }
+    throw
+  }
 
   $lockDir = Join-Path $env:LocalAppData "LocalNexusController"
   New-Item -ItemType Directory -Force -Path $lockDir | Out-Null
@@ -27,7 +54,9 @@ function Enter-WidgetLock {
   # If we ran very recently (e.g., both Startup shortcut and HKCU Run), exit.
   if (Test-Path $lockPath) {
     $age = (Get-Date) - (Get-Item $lockPath).LastWriteTime
-    if ($age.TotalSeconds -lt 45) { return $false }
+    if ($age.TotalSeconds -lt 45) {
+      return $false
+    }
   }
 
   Set-Content -Path $lockPath -Value (Get-Date).ToString("o")
@@ -192,7 +221,7 @@ $waitForInternet = $true
 $internetTimeoutSeconds = 90
 $startupDelaySeconds = 12
 $widgetWidth = 780
-$widgetHeight = 240
+$widgetHeight = 300  # 25% taller than previous default (240)
 $widgetMargin = 8
 
 $envPath = Join-Path $projectRoot ".env"
@@ -212,18 +241,18 @@ if (Test-Path $envPath) {
 # and Wi-Fi/Ethernet has time to connect.
 Start-Sleep -Seconds $startupDelaySeconds
 
-if (!(Enter-WidgetLock)) {
-  Write-WidgetLog $projectRoot "Lock indicates recent run; exiting."
-  exit 0
-}
-
-# Dashboard URL: prefer loopback for local desktop widget.
-$lncHost = "127.0.0.1"
-$url = "http://$lncHost`:$port/?widget=1"
-
-Write-WidgetLog $projectRoot "Starting widget. pythonExe=$pythonExe url=$url"
-
 try {
+  if (!(Enter-WidgetLock)) {
+    Write-WidgetLog $projectRoot "Lock indicates recent run; exiting."
+    return
+  }
+
+  # Dashboard URL: prefer loopback for local desktop widget.
+  $lncHost = "127.0.0.1"
+  $url = "http://$lncHost`:$port/?widget=1"
+
+  Write-WidgetLog $projectRoot "Starting widget. pythonExe=$pythonExe url=$url"
+
   if (!(Test-DashboardUp $url)) {
     Write-WidgetLog $projectRoot "Dashboard not up; starting server."
     Start-Server $pythonExe $projectRoot
@@ -249,5 +278,7 @@ try {
 } catch {
   Write-WidgetLog $projectRoot "ERROR: $($_.Exception.Message)"
   throw
+} finally {
+  Exit-WidgetLock
 }
 

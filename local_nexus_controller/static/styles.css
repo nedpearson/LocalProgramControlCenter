@@ -10,3 +10,89 @@
 .btn:hover {
   background: rgba(15, 23, 42, 0.8); /* slate-900 */
 }
+
+/* ------------------------------------------------------------
+   Widget mode (opened via /?widget=1)
+   Keeps the normal dashboard unchanged for full-size browsing.
+------------------------------------------------------------- */
+
+.lnc-widget {
+  font-size: 11px;
+  line-height: 1.15;
+}
+
+.lnc-widget .lnc-header-inner {
+  padding: 0.35rem 0.6rem;
+}
+
+.lnc-widget .lnc-nav {
+  font-size: 0.68rem;
+  gap: 0.25rem 0.45rem;
+}
+
+.lnc-widget .lnc-nav-btn {
+  padding: 0.15rem 0.4rem;
+  font-size: 0.68rem;
+}
+
+.lnc-widget .lnc-main {
+  padding: 0.5rem 0.6rem;
+}
+
+.lnc-widget .lnc-footer {
+  padding-left: 0.6rem;
+  padding-right: 0.6rem;
+  padding-bottom: 0.5rem;
+  font-size: 0.62rem;
+}
+
+.lnc-widget .lnc-h1 {
+  font-size: 0.95rem !important;
+}
+
+.lnc-widget .lnc-subtitle {
+  font-size: 0.7rem !important;
+  margin-top: 0.15rem !important;
+}
+
+.lnc-widget .lnc-stats-grid {
+  /* Wider widget window: keep stats in one row to save height */
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.35rem;
+  margin-top: 0.55rem !important;
+}
+
+.lnc-widget .lnc-card {
+  padding: 0.4rem !important;
+}
+
+.lnc-widget .lnc-metric {
+  font-size: 1rem !important;
+  margin-top: 0.1rem !important;
+}
+
+.lnc-widget .lnc-sections {
+  /* Force 2 columns in widget mode (even under Tailwind lg breakpoint) */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 0.55rem !important;
+  gap: 0.45rem !important;
+}
+
+.lnc-widget .lnc-panel {
+  padding: 0.45rem !important;
+}
+
+.lnc-widget .lnc-list {
+  margin-top: 0.3rem !important;
+  font-size: 0.72rem !important;
+}
+
+.lnc-widget .lnc-panel h2 {
+  font-size: 0.85rem;
+}
+
+.lnc-widget .lnc-list li {
+  /* Tighten alert/action rows without becoming illegible */
+  padding: 0.35rem 0.5rem !important;
+}
+

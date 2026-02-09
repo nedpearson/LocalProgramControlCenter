@@ -25,6 +25,7 @@ class Settings:
     port_range_end: int
     log_dir: Path
     reload: bool
+    open_browser: bool
 
 
 def load_settings() -> Settings:
@@ -53,6 +54,13 @@ def load_settings() -> Settings:
 
     reload = (os.getenv("LOCAL_NEXUS_RELOAD", "") or "").lower() in {"1", "true", "yes", "on"}
 
+    # Local convenience: auto-open dashboard in browser when launched via `python -m local_nexus_controller`.
+    # Defaults to enabled for local runs and disabled for hosted platforms that provide PORT.
+    open_browser_default = not bool(platform_port)
+    open_browser = (os.getenv("LOCAL_NEXUS_OPEN_BROWSER", "") or "").lower() in {"1", "true", "yes", "on"}
+    if os.getenv("LOCAL_NEXUS_OPEN_BROWSER") is None:
+        open_browser = open_browser_default
+
     return Settings(
         project_root=project_root,
         db_path=db_path,
@@ -63,6 +71,7 @@ def load_settings() -> Settings:
         port_range_end=port_range_end,
         log_dir=log_dir,
         reload=reload,
+        open_browser=open_browser,
     )
 
 

@@ -5,10 +5,10 @@ if (!(Test-Path ".\.venv")) {
 }
 
 .\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
 
 if (!(Test-Path ".\.env")) {
   Copy-Item ".\.env.example" ".\.env"
 }
 
-python -m local_nexus_controller
+.\.venv\Scripts\python.exe -m local_nexus_controller

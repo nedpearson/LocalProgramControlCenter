@@ -22,9 +22,35 @@ copy .env.example .env
 python -m local_nexus_controller
 ```
 
+By default, the controller will auto-open the dashboard in your browser on startup.
+To disable that behavior, set `LOCAL_NEXUS_OPEN_BROWSER=false` in your `.env`.
+
 Then open:
 - Dashboard: `http://127.0.0.1:5010`
 - API docs (Swagger): `http://127.0.0.1:5010/docs`
+
+## Show dashboard automatically after reboot (Windows)
+
+If you want the dashboard **visible after reboot/logon**, this repo includes a small “desktop widget” launcher that:
+- starts the server in the background
+- opens the dashboard as a **small app window** in the **bottom-left** of your primary monitor
+
+Enable it:
+
+```powershell
+.\tools\enable_startup.ps1
+```
+
+Disable it:
+
+```powershell
+.\tools\disable_startup.ps1
+```
+
+Notes:
+- Run `.\run.ps1` once first so the `.venv` and dependencies exist.
+- The widget uses Edge/Chrome/Brave (first one found in PATH).
+- To adjust size/position, edit `tools/start_dashboard_widget.ps1` (`$w`, `$h`).
 
 ## Import sample registry (4 services + 2 databases)
 
