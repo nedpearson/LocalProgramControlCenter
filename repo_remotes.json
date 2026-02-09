@@ -1,0 +1,34 @@
+{
+  "repos": [
+    {
+      "path": "C:/Users/nedpe/LocalNexusController",
+      "name": "LocalNexusController",
+      "expected_branch": "main",
+      "expected_origin": "https://github.com/nedpearson/LocalProgramControlCenter.git"
+    },
+    {
+      "path": "C:/Users/nedpe/job-tracker",
+      "name": "job-tracker",
+      "expected_branch": "main",
+      "expected_origin": "https://github.com/nedpearson/JobTracker.git"
+    },
+    {
+      "path": "C:/Users/nedpe/Documents/PearsonNexusAI/prototype",
+      "name": "prototype",
+      "expected_branch": "main",
+      "expected_origin": "https://github.com/nedpearson/New-Pearson_Nexus_AI.git"
+    },
+    {
+      "path": "C:/Users/nedpe/backend",
+      "name": "local-nexus-sample-backend",
+      "expected_branch": "main",
+      "expected_origin": "https://github.com/nedpearson/LocalNexus-Sample-Backend.git"
+    },
+    {
+      "path": "C:/Users/nedpe/frontend",
+      "name": "local-nexus-sample-frontend",
+      "expected_branch": "main",
+      "expected_origin": "https://github.com/nedpearson/LocalNexus-Sample-Frontend.git"
+    }
+  ]
+}

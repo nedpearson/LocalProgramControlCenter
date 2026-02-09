@@ -12,7 +12,7 @@ from local_nexus_controller.models import (
     KeyRef,
     Service,
 )
-from local_nexus_controller.services.ports import is_port_in_use, next_available_port, reserved_ports
+from local_nexus_controller.services.ports import is_port_in_use, next_available_port
 
 
 def _now_utc() -> datetime:
@@ -84,9 +84,12 @@ def import_bundle(session: Session, bundle: ImportBundle, host_for_port_checks: 
 
     # Check conflicts
     if port is not None:
-        reserved = reserved_ports(session)
-        if port in reserved:
-            warnings.append(f"Port {port} is already reserved in the registry.")
+        # Only warn if the port is reserved by a *different* service.
+        conflicting = session.exec(
+            select(Service).where(Service.port == int(port), Service.name != bundle.service.name)
+        ).first()
+        if conflicting:
+            warnings.append(f"Port {port} is already reserved in the registry (by '{conflicting.name}').")
         if is_port_in_use(host_for_port_checks, port):
             warnings.append(f"Port {port} appears to be in use on {host_for_port_checks}.")
 
