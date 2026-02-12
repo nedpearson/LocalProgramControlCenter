@@ -37,12 +37,11 @@ if not exist "requirements.txt" (
 
 echo Starting Local Nexus Controller...
 echo.
-echo If this is the first run, dependencies will be installed automatically.
-echo This may take 30-60 seconds. Please wait...
+echo Checking for port conflicts...
 echo.
 
-REM Run the application
-python -m local_nexus_controller
+REM Run the PowerShell script which handles port conflicts
+powershell -ExecutionPolicy Bypass -File "%~dp0run.ps1"
 
 REM If the script exits, show error message
 if errorlevel 1 (
@@ -51,10 +50,7 @@ if errorlevel 1 (
     echo ERROR: Application failed to start
     echo ============================================================
     echo.
-    echo If you see "ModuleNotFoundError", try installing manually:
-    echo   pip install -r requirements.txt
-    echo.
-    echo Then run this script again.
+    echo Check the error messages above for details.
     echo.
     pause
     exit /b 1

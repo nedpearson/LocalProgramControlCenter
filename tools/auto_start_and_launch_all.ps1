@@ -6,6 +6,32 @@
 
 $ErrorActionPreference = "Stop"
 
+# Function to kill process using a specific port
+function Stop-PortProcess {
+    param([int]$Port)
+
+    $connections = netstat -ano | Select-String ":$Port\s" | Select-String "LISTENING"
+
+    if ($connections) {
+        Write-Host "Found existing process on port $Port. Stopping it..."
+        foreach ($connection in $connections) {
+            $line = $connection.ToString().Trim()
+            $parts = $line -split '\s+' | Where-Object { $_ -ne '' }
+            $pid = $parts[-1]
+
+            if ($pid -match '^\d+$') {
+                try {
+                    Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue
+                    Start-Sleep -Milliseconds 500
+                    Write-Host "✓ Process stopped (PID: $pid)"
+                } catch {
+                    # Process already stopped or inaccessible
+                }
+            }
+        }
+    }
+}
+
 # Get the project root directory
 $ProjectRoot = Split-Path -Parent $PSScriptRoot
 
@@ -29,6 +55,9 @@ if (Test-Path $EnvFile) {
         }
     }
 }
+
+# Stop any existing process on the target port
+Stop-PortProcess -Port $Port
 
 # Start the controller in a new hidden window
 Write-Host "Starting Local Nexus Controller on port $Port..."

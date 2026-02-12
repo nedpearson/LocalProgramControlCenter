@@ -25,13 +25,16 @@ if (-not (Test-Path "$ProjectDir\package.json")) {
     exit 1
 }
 
-# Create a batch file that will run npm run dev
+# Create a PowerShell startup script
+$StartupScript = "$ProjectDir\tools\auto_start_controller.ps1"
+
+# Create a batch file that will run the PowerShell script
 $BatchFile = "$ProjectDir\tools\start_nexus_on_boot.bat"
 $BatchContent = @"
 @echo off
 REM Auto-generated startup script for Local Nexus Controller
 cd /d "$ProjectDir"
-npm run dev
+powershell -ExecutionPolicy Bypass -File "$StartupScript"
 "@
 
 Write-Host "Creating startup batch file..." -ForegroundColor Green
