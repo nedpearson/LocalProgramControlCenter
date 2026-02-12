@@ -12,20 +12,26 @@ from local_nexus_controller.models import ImportBundle, ServiceCreate, DatabaseC
 
 
 def detect_program_type(repo_path: Path) -> Optional[str]:
-    """Detect the type of program in a repository."""
-    if (repo_path / "package.json").exists():
-        return "nodejs"
-    if (repo_path / "requirements.txt").exists() or (repo_path / "pyproject.toml").exists():
-        return "python"
-    if (repo_path / "go.mod").exists():
-        return "go"
-    if (repo_path / "Cargo.toml").exists():
-        return "rust"
-    if (repo_path / "pom.xml").exists() or (repo_path / "build.gradle").exists():
-        return "java"
-    if (repo_path / ".csproj").exists():
-        return "dotnet"
-    return None
+    """Detect the type of program in a repository with error handling."""
+    try:
+        if not repo_path.exists() or not repo_path.is_dir():
+            return None
+
+        if (repo_path / "package.json").exists():
+            return "nodejs"
+        if (repo_path / "requirements.txt").exists() or (repo_path / "pyproject.toml").exists():
+            return "python"
+        if (repo_path / "go.mod").exists():
+            return "go"
+        if (repo_path / "Cargo.toml").exists():
+            return "rust"
+        if (repo_path / "pom.xml").exists() or (repo_path / "build.gradle").exists():
+            return "java"
+        if (repo_path / ".csproj").exists():
+            return "dotnet"
+        return None
+    except Exception:
+        return None
 
 
 def get_default_port(program_type: str, existing_ports: set[int]) -> int:
@@ -101,7 +107,7 @@ def generate_start_command(repo_path: Path, program_type: str, info: dict) -> st
 
 def scan_repository_folder(folder_path: str, existing_ports: set[int]) -> list[ImportBundle]:
     """
-    Scan a folder for repositories and generate import bundles.
+    Scan a folder for repositories and generate import bundles with error handling.
 
     Args:
         folder_path: Path to the folder containing repositories
@@ -111,62 +117,85 @@ def scan_repository_folder(folder_path: str, existing_ports: set[int]) -> list[I
         List of ImportBundle objects for discovered programs
     """
     bundles = []
-    folder = Path(folder_path)
 
-    if not folder.exists():
-        return bundles
+    try:
+        folder = Path(folder_path)
 
-    # Scan all subdirectories
-    for repo_path in folder.iterdir():
-        if not repo_path.is_dir() or repo_path.name.startswith("."):
-            continue
+        if not folder.exists():
+            print(f"⚠ Folder does not exist: {folder_path}")
+            return bundles
 
-        program_type = detect_program_type(repo_path)
-        if not program_type:
-            continue
+        if not folder.is_dir():
+            print(f"⚠ Path is not a directory: {folder_path}")
+            return bundles
 
-        info = extract_package_info(repo_path, program_type)
-        port = get_default_port(program_type, existing_ports)
-        existing_ports.add(port)
+        # Scan all subdirectories
+        for repo_path in folder.iterdir():
+            try:
+                # Skip non-directories and hidden folders
+                if not repo_path.is_dir() or repo_path.name.startswith("."):
+                    continue
 
-        service = ServiceCreate(
-            name=info["name"],
-            description=info["description"] or f"Auto-discovered {program_type} program",
-            category="auto-discovered",
-            tags=["auto-discovered", program_type],
-            tech_stack=[program_type],
-            dependencies=info["dependencies"][:10],  # Limit to first 10
-            config_paths=[str(repo_path)],
-            port=port,
-            local_url=f"http://localhost:{port}",
-            healthcheck_url=f"http://localhost:{port}/health",
-            working_directory=str(repo_path),
-            start_command=generate_start_command(repo_path, program_type, info),
-            stop_command="",  # Will use PID-based termination
-            restart_command="",
-            env_overrides={"PORT": str(port)},
-        )
+                # Skip common non-project folders
+                skip_folders = {"node_modules", ".git", "__pycache__", "venv", ".venv", "dist", "build"}
+                if repo_path.name in skip_folders:
+                    continue
 
-        bundle = ImportBundle(
-            service=service,
-            requested_port=port,
-            auto_assign_port=False,  # Use the specified port
-            auto_create_db=False,
-            meta={
-                "source": "auto_discovery",
-                "program_type": program_type,
-                "discovered_at": str(repo_path),
-            },
-        )
+                program_type = detect_program_type(repo_path)
+                if not program_type:
+                    continue
 
-        bundles.append(bundle)
+                info = extract_package_info(repo_path, program_type)
+                port = get_default_port(program_type, existing_ports)
+                existing_ports.add(port)
+
+                # Sanitize name - remove invalid characters
+                safe_name = info["name"].replace("@", "").replace("/", "-")[:100]
+
+                service = ServiceCreate(
+                    name=safe_name,
+                    description=info["description"] or f"Auto-discovered {program_type} program",
+                    category="auto-discovered",
+                    tags=["auto-discovered", program_type],
+                    tech_stack=[program_type],
+                    dependencies=info["dependencies"][:10],  # Limit to first 10
+                    config_paths=[str(repo_path)],
+                    port=port,
+                    local_url=f"http://localhost:{port}",
+                    healthcheck_url=f"http://localhost:{port}/health",
+                    working_directory=str(repo_path),
+                    start_command=generate_start_command(repo_path, program_type, info),
+                    stop_command="",  # Will use PID-based termination
+                    restart_command="",
+                    env_overrides={"PORT": str(port)},
+                )
+
+                bundle = ImportBundle(
+                    service=service,
+                    requested_port=port,
+                    auto_assign_port=False,  # Use the specified port
+                    auto_create_db=False,
+                    meta={
+                        "source": "auto_discovery",
+                        "program_type": program_type,
+                        "discovered_at": str(repo_path),
+                    },
+                )
+
+                bundles.append(bundle)
+            except Exception as e:
+                print(f"⚠ Error processing {repo_path.name}: {e}")
+                continue
+
+    except Exception as e:
+        print(f"✗ Error scanning folder {folder_path}: {e}")
 
     return bundles
 
 
 def extract_and_scan_zip(zip_path: Path, extract_to: Path) -> Optional[ImportBundle]:
     """
-    Extract a ZIP file and scan it for a program to import.
+    Extract a ZIP file and scan it for a program to import with comprehensive error handling.
 
     Args:
         zip_path: Path to the ZIP file
@@ -176,7 +205,19 @@ def extract_and_scan_zip(zip_path: Path, extract_to: Path) -> Optional[ImportBun
         ImportBundle if a valid program is found, None otherwise
     """
     try:
-        # Create extraction folder
+        # Validate inputs
+        if not zip_path.exists():
+            print(f"✗ ZIP file not found: {zip_path}")
+            return None
+
+        if not zipfile.is_zipfile(zip_path):
+            print(f"✗ File is not a valid ZIP: {zip_path}")
+            return None
+
+        # Ensure extraction folder exists
+        extract_to.mkdir(parents=True, exist_ok=True)
+
+        # Create extraction folder with unique name
         program_name = zip_path.stem
         target_dir = extract_to / program_name
 
@@ -187,9 +228,23 @@ def extract_and_scan_zip(zip_path: Path, extract_to: Path) -> Optional[ImportBun
                 counter += 1
             target_dir = extract_to / f"{program_name}_{counter}"
 
-        # Extract ZIP
-        with zipfile.ZipFile(zip_path, "r") as zip_ref:
-            zip_ref.extractall(target_dir)
+        # Extract ZIP with safety checks
+        try:
+            with zipfile.ZipFile(zip_path, "r") as zip_ref:
+                # Check for zip bombs (files that expand to huge sizes)
+                total_size = sum(info.file_size for info in zip_ref.infolist())
+                if total_size > 1024 * 1024 * 1024:  # 1GB limit
+                    print(f"⚠ ZIP file too large (>1GB): {zip_path}")
+                    return None
+
+                zip_ref.extractall(target_dir)
+                print(f"✓ Extracted ZIP to: {target_dir}")
+        except zipfile.BadZipFile:
+            print(f"✗ Corrupted ZIP file: {zip_path}")
+            return None
+        except Exception as e:
+            print(f"✗ Failed to extract ZIP {zip_path}: {e}")
+            return None
 
         # Scan the extracted folder
         bundles = scan_repository_folder(str(target_dir.parent), set())
@@ -199,8 +254,14 @@ def extract_and_scan_zip(zip_path: Path, extract_to: Path) -> Optional[ImportBun
             if target_dir.name in bundle.service.working_directory:
                 return bundle
 
+        # If no direct match, check if program is in a subdirectory
+        bundles = scan_repository_folder(str(target_dir), set())
+        if bundles:
+            return bundles[0]
+
+        print(f"⚠ No valid program found in ZIP: {zip_path.name}")
         return None
 
     except Exception as e:
-        print(f"Error extracting {zip_path}: {e}")
+        print(f"✗ Error extracting {zip_path}: {e}")
         return None

@@ -45,12 +45,23 @@ class FileWatcher:
         print("File watcher stopped")
 
     def _watch_loop(self) -> None:
-        """Main loop that checks for new ZIP files."""
+        """Main loop that checks for new ZIP files with error recovery."""
+        consecutive_errors = 0
+        max_consecutive_errors = 10
+
         while self.running:
             try:
                 self._check_for_zips()
+                consecutive_errors = 0  # Reset on success
             except Exception as e:
-                print(f"File watcher error: {e}")
+                consecutive_errors += 1
+                print(f"✗ File watcher error ({consecutive_errors}/{max_consecutive_errors}): {e}")
+
+                # Stop if too many consecutive errors
+                if consecutive_errors >= max_consecutive_errors:
+                    print(f"✗ File watcher stopping after {max_consecutive_errors} consecutive errors")
+                    self.running = False
+                    break
 
             time.sleep(self.check_interval)
 
