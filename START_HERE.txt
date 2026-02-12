@@ -1,0 +1,55 @@
+================================================================================
+                    LOCAL NEXUS CONTROLLER - START HERE
+================================================================================
+
+QUICK START - CHOOSE ONE:
+================================================================================
+
+[ 1 ] Manual Startup (Test First)
+
+    Double-click:  QUICK_START.bat
+
+    This starts the controller and handles all errors automatically.
+    Dashboard: http://127.0.0.1:5010
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+[ 2 ] Auto-Start on Reboot (One-Time Setup)
+
+    Right-click:  SIMPLE_AUTO_START_SETUP.bat
+    Select:      "Run as administrator"
+
+    After this, the controller starts automatically when you log in.
+
+================================================================================
+DOCUMENTATION
+================================================================================
+
+FINAL_SETUP.md              - Complete setup guide
+SIMPLE_STARTUP_GUIDE.md     - Detailed startup instructions
+PORT_CONFLICT_FIX.md        - Port conflict resolution details
+README.md                   - Full project documentation
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+Port Errors?               All startup scripts now handle this automatically
+Python Not Found?          Install Python from python.org and check "Add to PATH"
+Script Won't Run?          Run: Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+View logs:                 data\logs\auto-start.log
+
+================================================================================
+WHAT'S NEW
+================================================================================
+
+All startup scripts have been upgraded to:
+  - Automatically detect and stop port conflicts
+  - Use absolute paths (no more "file not found" errors)
+  - Provide comprehensive logging
+  - Work reliably every time
+
+No complex setup needed. Just use QUICK_START.bat or set up auto-start once.
+
+================================================================================

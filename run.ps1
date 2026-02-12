@@ -1,5 +1,11 @@
 $ErrorActionPreference = "Stop"
 
+Write-Host ""
+Write-Host "============================================================" -ForegroundColor Cyan
+Write-Host "Local Nexus Controller - Startup" -ForegroundColor Cyan
+Write-Host "============================================================" -ForegroundColor Cyan
+Write-Host ""
+
 # Function to kill process using port 5010
 function Stop-PortProcess {
     param([int]$Port = 5010)
@@ -36,15 +42,34 @@ function Stop-PortProcess {
 # Stop any existing process on port 5010
 Stop-PortProcess -Port 5010
 
+Write-Host ""
+
 if (!(Test-Path ".\.venv")) {
+  Write-Host "Creating virtual environment..." -ForegroundColor Yellow
   py -m venv .venv
+  Write-Host "✓ Virtual environment created" -ForegroundColor Green
+  Write-Host ""
 }
 
+Write-Host "Activating virtual environment..." -ForegroundColor Yellow
 .\.venv\Scripts\Activate.ps1
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+
+Write-Host "Installing/updating dependencies..." -ForegroundColor Yellow
+.\.venv\Scripts\python.exe -m pip install -q -r requirements.txt
+Write-Host "✓ Dependencies ready" -ForegroundColor Green
+Write-Host ""
 
 if (!(Test-Path ".\.env")) {
+  Write-Host "Creating .env file from template..." -ForegroundColor Yellow
   Copy-Item ".\.env.example" ".\.env"
+  Write-Host "✓ .env file created" -ForegroundColor Green
+  Write-Host ""
 }
+
+Write-Host "Starting Local Nexus Controller..." -ForegroundColor Green
+Write-Host "Dashboard will be available at: http://127.0.0.1:5010" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "============================================================" -ForegroundColor Cyan
+Write-Host ""
 
 .\.venv\Scripts\python.exe -m local_nexus_controller

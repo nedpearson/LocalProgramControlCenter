@@ -4,23 +4,41 @@ Local Nexus Controller is a **Windows-friendly local dashboard + API** to **regi
 
 ---
 
-## ⚡ Complete Automation Setup
+## 🚀 Quick Start (NEW - Error-Free)
 
-**Want everything to start automatically when Windows boots?**
+### Manual Startup
+**Double-click:** `QUICK_START.bat`
 
-👉 **Double-click:** `SETUP_COMPLETE_AUTOMATION.bat`
+Automatically handles port conflicts and starts the controller.
 
-**Result:**
-- Controller starts on Windows boot
-- All services start automatically
-- Dashboard opens in browser
-- Zero manual steps!
+### Auto-Start on Reboot (One-Time Setup)
+**Right-click and "Run as Administrator":** `SIMPLE_AUTO_START_SETUP.bat`
+
+After this, the controller starts automatically when you log in.
+
+**See:** [FINAL_SETUP.md](FINAL_SETUP.md) or [SIMPLE_STARTUP_GUIDE.md](SIMPLE_STARTUP_GUIDE.md)
+
+---
+
+## 🔧 Alternative Setup Options
+
+### Complete Automation (Advanced)
+**Double-click:** `SETUP_COMPLETE_AUTOMATION.bat`
+
+Configures:
+- Controller auto-start on Windows boot
+- All services auto-start when controller starts
+- Dashboard widget opens automatically
 
 **See:** [COMPLETE_AUTOMATION_GUIDE.md](COMPLETE_AUTOMATION_GUIDE.md)
 
 ---
 
 ## 🚨 Having Issues?
+
+### Port Conflict Errors?
+These are now handled automatically by all startup scripts.
+**See:** [PORT_CONFLICT_FIX.md](PORT_CONFLICT_FIX.md)
 
 ### Startup Errors After Reboot?
 **See:** [START_HERE_AFTER_REBOOT.md](START_HERE_AFTER_REBOOT.md)
