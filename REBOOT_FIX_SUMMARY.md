@@ -1,8 +1,59 @@
-# Post-Reboot Startup Fix - Summary
+# Fix Summary - Your Startup Errors After Reboot
 
-## Problem Solved
+## The Errors You're Seeing (From Your Screenshot)
 
-After rebooting your system or when the Bolt.new environment resets, the application failed to start with:
+Based on your screenshot, you have 3 main problems:
+
+### 1. Wrong Directory (System32)
+You're running commands from `C:\WINDOWS\system32` instead of your project folder.
+
+### 2. Fake Path
+You tried `cd C:\path\to\local-nexus-controller` - this doesn't exist (it's a placeholder from docs).
+
+### 3. Old Broken Startup
+Old widget scripts in Windows Startup folder are failing with file not found errors.
+
+---
+
+## How To Fix RIGHT NOW
+
+### Step 1: Find Your Actual Project Path
+
+**Double-click this file:** `WHERE_AM_I.bat`
+
+It will show your real project location (not the placeholder path).
+
+### Step 2: Clean Up Old Broken Startup
+
+1. Open your project folder
+2. Hold Shift + right-click inside the folder
+3. Select "Open PowerShell window here"
+4. Run:
+   ```powershell
+   .\tools\cleanup_old_startup.ps1
+   ```
+5. Press Y to remove old shortcuts
+
+### Step 3: Enable Auto-Start Correctly
+
+**Double-click:** `tools\ENABLE_AUTO_START.bat`
+
+Click "Yes" when asked for administrator access.
+
+### Step 4: Test It
+
+**Manual test:**
+- Double-click `start.bat`
+- Dashboard should open at http://localhost:5010
+
+**Auto-start test:**
+- Log out of Windows
+- Log back in
+- Should start automatically!
+
+---
+
+##What I Created To Fix This
 ```
 ModuleNotFoundError: No module named 'uvicorn'
 ```

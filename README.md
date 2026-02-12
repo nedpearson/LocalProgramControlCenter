@@ -2,6 +2,21 @@
 
 Local Nexus Controller is a **Windows-friendly local dashboard + API** to **register, document, monitor, and control** all locally-hosted programs/services you build.
 
+---
+
+## 🚨 Having Startup Issues After Reboot?
+
+**See:** [START_HERE_AFTER_REBOOT.md](START_HERE_AFTER_REBOOT.md) - Fixes all common startup errors
+
+**Quick fixes:**
+- **Find project path:** Double-click `WHERE_AM_I.bat`
+- **Clean old broken startup:** Run `tools\cleanup_old_startup.ps1` in PowerShell
+- **Enable auto-start:** Double-click `tools\ENABLE_AUTO_START.bat`
+
+---
+
+## What It Provides
+
 It provides:
 - **Service registry** (SQLite)
 - **Database registry** (SQLite)
