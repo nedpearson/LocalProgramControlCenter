@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -19,6 +20,7 @@ router = APIRouter(include_in_schema=False)
 templates = Jinja2Templates(directory=str(Path(__file__).resolve().parents[1] / "templates"))
 templates.env.auto_reload = True
 templates.env.cache = {}
+CACHE_BUST = str(int(time.time()))
 
 
 @router.get("/", response_class=HTMLResponse)
@@ -52,6 +54,7 @@ def dashboard(request: Request, session: Session = Depends(get_session)) -> HTML
         request,
         "dashboard.html",
         {
+            "cache_bust": CACHE_BUST,
             "totals": {
                 "services": len(services),
                 "running": len(running_services),
@@ -75,7 +78,7 @@ def services_page(request: Request, session: Session = Depends(get_session)) -> 
     for svc in services:
         refresh_status(session, svc)
     session.commit()
-    return templates.TemplateResponse(request, "services.html", {"services": services})
+    return templates.TemplateResponse(request, "services.html", {"cache_bust": CACHE_BUST, "services": services})
 
 
 @router.get("/services/{service_id}", response_class=HTMLResponse)
@@ -98,7 +101,7 @@ def service_detail(request: Request, service_id: str, session: Session = Depends
     return templates.TemplateResponse(
         request,
         "service_detail.html",
-        {"service": svc, "database": db, "keys": keys, "log_tail": log_tail, "port_in_use": port_in_use},
+        {"cache_bust": CACHE_BUST, "service": svc, "database": db, "keys": keys, "log_tail": log_tail, "port_in_use": port_in_use},
     )
 
 
@@ -110,23 +113,23 @@ def databases_page(request: Request, session: Session = Depends(get_session)) ->
     for svc in services:
         if svc.database_id:
             by_db.setdefault(svc.database_id, []).append(svc)
-    return templates.TemplateResponse(request, "databases.html", {"databases": dbs, "linked": by_db})
+    return templates.TemplateResponse(request, "databases.html", {"cache_bust": CACHE_BUST, "databases": dbs, "linked": by_db})
 
 
 @router.get("/ports", response_class=HTMLResponse)
 def ports_page(request: Request, session: Session = Depends(get_session)) -> HTMLResponse:
     ports = port_map(session, host="127.0.0.1")
     next_port = next_available_port(session, host="127.0.0.1")
-    return templates.TemplateResponse(request, "ports.html", {"ports": ports, "next_port": next_port})
+    return templates.TemplateResponse(request, "ports.html", {"cache_bust": CACHE_BUST, "ports": ports, "next_port": next_port})
 
 
 @router.get("/keys", response_class=HTMLResponse)
 def keys_page(request: Request, session: Session = Depends(get_session)) -> HTMLResponse:
     keys = list(session.exec(select(KeyRef).order_by(KeyRef.env_var)))
     services = {s.id: s for s in session.exec(select(Service))}
-    return templates.TemplateResponse(request, "keys.html", {"keys": keys, "services": services})
+    return templates.TemplateResponse(request, "keys.html", {"cache_bust": CACHE_BUST, "keys": keys, "services": services})
 
 
 @router.get("/import", response_class=HTMLResponse)
 def import_page(request: Request) -> HTMLResponse:
-    return templates.TemplateResponse(request, "import.html", {})
+    return templates.TemplateResponse(request, "import.html", {"cache_bust": CACHE_BUST})

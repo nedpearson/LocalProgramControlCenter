@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>{% block title %}Local Nexus Controller{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="/static/styles.css" />
+    <link rel="stylesheet" href="/static/styles.css?v={{ cache_bust }}" />
   </head>
   <body class="bg-slate-950 text-slate-100 overflow-x-hidden {% if request.query_params.get('widget') == '1' %}lnc-widget{% endif %}">
     <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur">
@@ -49,6 +49,6 @@
       Registry DB: SQLite. Secrets: references only.
     </footer>
 
-    <script src="/static/app.js"></script>
+    <script src="/static/app.js?v={{ cache_bust }}"></script>
   </body>
 </html>
