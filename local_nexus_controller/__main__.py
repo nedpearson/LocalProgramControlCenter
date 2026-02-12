@@ -1,7 +1,42 @@
 import os
+import sys
+import subprocess
 import threading
-import uvicorn
 import webbrowser
+
+try:
+    import uvicorn
+except ImportError:
+    print("=" * 60)
+    print("MISSING DEPENDENCIES")
+    print("=" * 60)
+    print("uvicorn is not installed. Installing dependencies...")
+    print()
+
+    try:
+        subprocess.check_call([
+            sys.executable, "-m", "pip", "install",
+            "--break-system-packages", "-r", "requirements.txt"
+        ], stderr=subprocess.STDOUT)
+        print("\n✓ Dependencies installed successfully")
+        print("Please restart the application.\n")
+    except subprocess.CalledProcessError:
+        try:
+            subprocess.check_call([
+                sys.executable, "-m", "pip", "install",
+                "--user", "-r", "requirements.txt"
+            ], stderr=subprocess.STDOUT)
+            print("\n✓ Dependencies installed successfully")
+            print("Please restart the application.\n")
+        except subprocess.CalledProcessError as e:
+            print("\n✗ Failed to install dependencies")
+            print(f"Error: {e}")
+            print("\nPlease install manually:")
+            print(f"  {sys.executable} -m pip install -r requirements.txt")
+            print()
+            sys.exit(1)
+
+    sys.exit(0)
 
 from local_nexus_controller.settings import settings
 
