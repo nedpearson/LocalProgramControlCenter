@@ -107,7 +107,7 @@ def generate_start_command(repo_path: Path, program_type: str, info: dict) -> st
 
 def scan_repository_folder(folder_path: str, existing_ports: set[int]) -> list[ImportBundle]:
     """
-    Scan a folder for repositories and generate import bundles with error handling.
+    Scan a folder for repositories and ZIP files, generate import bundles.
 
     Args:
         folder_path: Path to the folder containing repositories
@@ -122,26 +122,58 @@ def scan_repository_folder(folder_path: str, existing_ports: set[int]) -> list[I
         folder = Path(folder_path)
 
         if not folder.exists():
-            print(f"⚠ Folder does not exist: {folder_path}")
             return bundles
 
         if not folder.is_dir():
-            print(f"⚠ Path is not a directory: {folder_path}")
             return bundles
 
-        # Scan all subdirectories
-        for repo_path in folder.iterdir():
+        zip_files_to_process = []
+        dirs_to_scan = []
+
+        for item in folder.iterdir():
             try:
-                # Skip non-directories and hidden folders
-                if not repo_path.is_dir() or repo_path.name.startswith("."):
+                if item.name.startswith("."):
                     continue
 
-                # Skip common non-project folders
-                skip_folders = {"node_modules", ".git", "__pycache__", "venv", ".venv", "dist", "build"}
-                if repo_path.name in skip_folders:
+                if item.is_file() and item.suffix.lower() == ".zip":
+                    zip_files_to_process.append(item)
+                elif item.is_dir():
+                    skip_folders = {"node_modules", ".git", "__pycache__", "venv", ".venv", "dist", "build"}
+                    if item.name not in skip_folders:
+                        dirs_to_scan.append(item)
+            except Exception:
+                continue
+
+        for zip_path in zip_files_to_process:
+            try:
+                extracted_dir = folder / zip_path.stem
+                if extracted_dir.exists():
                     continue
 
+                if not zipfile.is_zipfile(zip_path):
+                    continue
+
+                with zipfile.ZipFile(zip_path, "r") as zip_ref:
+                    total_size = sum(info.file_size for info in zip_ref.infolist())
+                    if total_size > 1024 * 1024 * 1024:
+                        continue
+                    zip_ref.extractall(extracted_dir)
+
+                dirs_to_scan.append(extracted_dir)
+            except Exception:
+                continue
+
+        for repo_path in dirs_to_scan:
+            try:
                 program_type = detect_program_type(repo_path)
+                if not program_type:
+                    for subdir in repo_path.iterdir():
+                        if subdir.is_dir() and not subdir.name.startswith("."):
+                            program_type = detect_program_type(subdir)
+                            if program_type:
+                                repo_path = subdir
+                                break
+
                 if not program_type:
                     continue
 
@@ -149,7 +181,6 @@ def scan_repository_folder(folder_path: str, existing_ports: set[int]) -> list[I
                 port = get_default_port(program_type, existing_ports)
                 existing_ports.add(port)
 
-                # Sanitize name - remove invalid characters
                 safe_name = info["name"].replace("@", "").replace("/", "-")[:100]
 
                 service = ServiceCreate(
@@ -158,14 +189,14 @@ def scan_repository_folder(folder_path: str, existing_ports: set[int]) -> list[I
                     category="auto-discovered",
                     tags=["auto-discovered", program_type],
                     tech_stack=[program_type],
-                    dependencies=info["dependencies"][:10],  # Limit to first 10
+                    dependencies=info["dependencies"][:10],
                     config_paths=[str(repo_path)],
                     port=port,
                     local_url=f"http://localhost:{port}",
                     healthcheck_url=f"http://localhost:{port}/health",
                     working_directory=str(repo_path),
                     start_command=generate_start_command(repo_path, program_type, info),
-                    stop_command="",  # Will use PID-based termination
+                    stop_command="",
                     restart_command="",
                     env_overrides={"PORT": str(port)},
                 )
@@ -173,7 +204,7 @@ def scan_repository_folder(folder_path: str, existing_ports: set[int]) -> list[I
                 bundle = ImportBundle(
                     service=service,
                     requested_port=port,
-                    auto_assign_port=False,  # Use the specified port
+                    auto_assign_port=False,
                     auto_create_db=False,
                     meta={
                         "source": "auto_discovery",
@@ -183,12 +214,11 @@ def scan_repository_folder(folder_path: str, existing_ports: set[int]) -> list[I
                 )
 
                 bundles.append(bundle)
-            except Exception as e:
-                print(f"⚠ Error processing {repo_path.name}: {e}")
+            except Exception:
                 continue
 
-    except Exception as e:
-        print(f"✗ Error scanning folder {folder_path}: {e}")
+    except Exception:
+        pass
 
     return bundles
 
