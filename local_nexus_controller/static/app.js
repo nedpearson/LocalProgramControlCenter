@@ -232,6 +232,23 @@ async function lncServiceAction(serviceId, action, reloadAfter = false) {
   }
 }
 
+async function lncDeleteService(serviceId) {
+  if (!confirm("Are you sure you want to delete this service? This action cannot be undone.")) {
+    return;
+  }
+  try {
+    await lncFetchJson(`/api/services/${serviceId}`, { method: "DELETE" });
+    const currentPath = window.location.pathname;
+    if (currentPath.includes(`/services/${serviceId}`)) {
+      window.location.href = "/services";
+    } else {
+      location.reload();
+    }
+  } catch (e) {
+    alert(String(e.message || e));
+  }
+}
+
 async function lncImportBundle() {
   const input = document.getElementById("bundle");
   const result = document.getElementById("result");

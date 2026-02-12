@@ -17,6 +17,7 @@
       <button class="btn" onclick="lncServiceAction('{{ service.id }}','start', true)">Start</button>
       <button class="btn" onclick="lncServiceAction('{{ service.id }}','stop', true)">Stop</button>
       <button class="btn" onclick="lncServiceAction('{{ service.id }}','restart', true)">Restart</button>
+      <button class="btn bg-rose-900 hover:bg-rose-800 border-rose-800" onclick="lncDeleteService('{{ service.id }}')">Delete</button>
     </div>
   </div>
 
