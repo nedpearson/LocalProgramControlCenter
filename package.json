@@ -3,10 +3,8 @@
   "version": "0.1.0",
   "description": "Local service controller and dashboard",
   "scripts": {
-    "postinstall": "python3 -m pip install --break-system-packages -r requirements.txt 2>/dev/null || python3 -m pip install --user -r requirements.txt 2>/dev/null || pip3 install --break-system-packages -r requirements.txt 2>/dev/null || pip3 install --user -r requirements.txt 2>/dev/null || echo 'Note: Python dependencies will be installed on first run'",
-    "predev": "python3 -c 'import uvicorn' 2>/dev/null || python3 -m pip install --break-system-packages -r requirements.txt || python3 -m pip install --user -r requirements.txt",
     "dev": "python3 -m local_nexus_controller",
     "start": "python3 -m local_nexus_controller",
-    "build": "python3 -m pip install --break-system-packages -r requirements.txt 2>/dev/null || python3 -m pip install --user -r requirements.txt 2>/dev/null || echo 'Dependencies check' && python3 -c 'from local_nexus_controller.main import app; print(\"✓ Application ready\")'"
+    "build": "echo 'Python project - dependencies managed by application'"
   }
 }

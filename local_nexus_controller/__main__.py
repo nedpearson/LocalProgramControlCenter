@@ -13,28 +13,34 @@ except ImportError:
     print("uvicorn is not installed. Installing dependencies...")
     print()
 
-    try:
-        subprocess.check_call([
-            sys.executable, "-m", "pip", "install",
-            "--break-system-packages", "-r", "requirements.txt"
-        ], stderr=subprocess.STDOUT)
-        print("\n✓ Dependencies installed successfully")
-        print("Please restart the application.\n")
-    except subprocess.CalledProcessError:
+    installation_methods = [
+        (["pip3", "install", "-r", "requirements.txt"], "pip3 install"),
+        (["pip", "install", "-r", "requirements.txt"], "pip install"),
+        ([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"], "python -m pip"),
+        (["pip3", "install", "--user", "-r", "requirements.txt"], "pip3 install --user"),
+        (["pip", "install", "--user", "-r", "requirements.txt"], "pip install --user"),
+    ]
+
+    success = False
+    for cmd, desc in installation_methods:
         try:
-            subprocess.check_call([
-                sys.executable, "-m", "pip", "install",
-                "--user", "-r", "requirements.txt"
-            ], stderr=subprocess.STDOUT)
-            print("\n✓ Dependencies installed successfully")
+            print(f"Trying: {desc}...")
+            subprocess.check_call(cmd, stderr=subprocess.STDOUT)
+            print(f"\n✓ Dependencies installed successfully using {desc}")
             print("Please restart the application.\n")
-        except subprocess.CalledProcessError as e:
-            print("\n✗ Failed to install dependencies")
-            print(f"Error: {e}")
-            print("\nPlease install manually:")
-            print(f"  {sys.executable} -m pip install -r requirements.txt")
-            print()
-            sys.exit(1)
+            success = True
+            break
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            continue
+
+    if not success:
+        print("\n✗ Failed to install dependencies using all methods")
+        print("\nPlease install manually using one of these commands:")
+        print("  pip install -r requirements.txt")
+        print("  pip3 install -r requirements.txt")
+        print(f"  {sys.executable} -m pip install -r requirements.txt")
+        print()
+        sys.exit(1)
 
     sys.exit(0)
 
