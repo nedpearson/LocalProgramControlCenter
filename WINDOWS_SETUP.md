@@ -1,5 +1,15 @@
 # Windows Setup Guide
 
+## ⭐ Want Auto-Start on Boot?
+
+**NEW:** You can now configure the controller to automatically start when you log into Windows!
+
+**Just double-click:** `tools/ENABLE_AUTO_START.bat`
+
+See [AUTO_START_GUIDE.md](AUTO_START_GUIDE.md) for complete instructions.
+
+---
+
 ## Quick Fix for "EPERM: operation not permitted" Error
 
 If you see an error like:

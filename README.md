@@ -54,28 +54,49 @@ Now when you edit any Python, HTML, CSS, or JS file and save:
 
 📖 See [LIVE_RELOAD.md](LIVE_RELOAD.md) for detailed guide and [DEVELOPMENT.md](DEVELOPMENT.md) for best practices.
 
-## Show dashboard automatically after reboot (Windows)
+## Auto-Start on Windows Boot
 
-If you want the dashboard **visible after reboot/logon**, this repo includes a small “desktop widget” launcher that:
-- starts the server in the background
-- opens the dashboard as a **small app window** in the **bottom-left** of your primary monitor
+**The controller can automatically start when you log into Windows!**
 
-Enable it:
+### Quick Setup (Recommended)
 
+Simply double-click one of these files in the `tools` folder:
+
+- **`ENABLE_AUTO_START.bat`** - Enable auto-start (requires admin)
+- **`DISABLE_AUTO_START.bat`** - Disable auto-start (requires admin)
+
+That's it! After enabling, the controller will:
+- ✅ Start automatically when you log in
+- ✅ Run from the correct project directory
+- ✅ Auto-install dependencies if needed
+- ✅ Open the dashboard in your browser
+
+📖 See [AUTO_START_GUIDE.md](AUTO_START_GUIDE.md) for complete setup guide and troubleshooting.
+
+### Advanced Setup (PowerShell)
+
+If you prefer PowerShell commands:
+
+**Enable auto-start:**
 ```powershell
-.\tools\enable_startup.ps1
+.\tools\setup_auto_start.ps1
 ```
 
-Disable it:
-
+**Disable auto-start:**
 ```powershell
-.\tools\disable_startup.ps1
+.\tools\disable_auto_start.ps1
 ```
 
-Notes:
-- Run `.\run.ps1` once first so the `.venv` and dependencies exist.
-- The widget uses Edge/Chrome/Brave (first one found in PATH).
-- To adjust size/position, edit `tools/start_dashboard_widget.ps1` (`$w`, `$h`).
+### Desktop Widget (Alternative)
+
+For a small dashboard widget window in the corner of your screen:
+
+```powershell
+.\tools\enable_startup.ps1    # Enable widget
+.\tools\disable_startup.ps1   # Disable widget
+```
+
+The widget opens the dashboard as a small app window in the bottom-left of your monitor.
 
 ## Import sample registry (4 services + 2 databases)
 
