@@ -9,6 +9,10 @@ It provides:
 - **Secrets/keys references** (env-var references only; never store real secrets)
 - **Process control** (start/stop/restart; logs captured to `data/logs/`)
 - **Web dashboard** with drill-downs and an **Import Bundle** feature for auto-populating new programs
+- **Live reload** for instant development feedback (Python, HTML, CSS, JS)
+- **Auto-discovery** of programs in your repositories folder
+- **ZIP file watcher** for automatic program import
+- **Auto-start** all services on boot
 
 ## Quick start (PowerShell)
 
@@ -28,6 +32,27 @@ To disable that behavior, set `LOCAL_NEXUS_OPEN_BROWSER=false` in your `.env`.
 Then open:
 - Dashboard: `http://127.0.0.1:5010`
 - API docs (Swagger): `http://127.0.0.1:5010/docs`
+
+## Live Reload for Development
+
+**Make changes and see them instantly!** No manual restarts needed.
+
+```powershell
+# Enable live reload in .env
+LOCAL_NEXUS_RELOAD=true
+
+# Start development server
+npm run dev
+```
+
+Now when you edit any Python, HTML, CSS, or JS file and save:
+1. Server automatically reloads (1-2 seconds)
+2. Refresh your browser to see changes
+3. Keep iterating quickly!
+
+**Works in both Bolt.new and Cursor** - just save your changes and refresh the browser.
+
+📖 See [LIVE_RELOAD.md](LIVE_RELOAD.md) for detailed guide and [DEVELOPMENT.md](DEVELOPMENT.md) for best practices.
 
 ## Show dashboard automatically after reboot (Windows)
 

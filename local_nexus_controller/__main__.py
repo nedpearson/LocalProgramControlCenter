@@ -21,11 +21,15 @@ def main() -> None:
 
         threading.Timer(0.75, _open).start()
 
+    reload_dirs = [str(settings.project_root / "local_nexus_controller")]
+
     uvicorn.run(
         "local_nexus_controller.main:app",
         host=settings.host,
         port=settings.port,
         reload=settings.reload,
+        reload_dirs=reload_dirs if settings.reload else None,
+        reload_includes=["*.py", "*.html", "*.css", "*.js"] if settings.reload else None,
     )
 
 

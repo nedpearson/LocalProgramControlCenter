@@ -4,8 +4,8 @@
   "description": "Local service controller and dashboard",
   "scripts": {
     "install": "pip install --break-system-packages -r requirements.txt || pip install --user -r requirements.txt || true",
-    "dev": "python3 -m uvicorn local_nexus_controller.main:app --host 0.0.0.0 --port ${PORT:-5010} --reload",
-    "start": "python3 -m uvicorn local_nexus_controller.main:app --host 0.0.0.0 --port ${PORT:-5010}",
+    "dev": "python3 -m local_nexus_controller",
+    "start": "python3 -m local_nexus_controller",
     "build": "echo 'Python project - no build step required'"
   }
 }
