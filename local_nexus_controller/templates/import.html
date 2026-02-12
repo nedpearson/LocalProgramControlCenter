@@ -6,13 +6,36 @@
     <div>
       <h1 class="text-2xl font-semibold">Import Bundle</h1>
       <p class="text-slate-400 text-sm mt-1">
-        Paste a JSON bundle to auto-register a new program (service + optional database + key references).
+        Drag and drop files or paste JSON to auto-register programs.
       </p>
     </div>
     <div class="text-sm text-slate-300">
       <a class="underline hover:text-white" href="/api/import/bundle-template" target="_blank">View template</a>
     </div>
   </div>
+
+  <section class="mt-6 rounded-xl border-2 border-dashed border-slate-700 bg-slate-900/30 p-8" id="dropZone">
+    <div class="text-center">
+      <div class="text-4xl mb-4">📦</div>
+      <h2 class="font-semibold text-lg">Drag & Drop Import</h2>
+      <p class="text-slate-400 text-sm mt-2">
+        Drop a .json bundle file or .zip archive here to import
+      </p>
+      <p class="text-slate-500 text-xs mt-2">
+        or click to browse files
+      </p>
+      <input type="file" id="fileInput" accept=".json,.zip" class="hidden" />
+      <button class="btn mt-4 bg-blue-600 hover:bg-blue-700 border-blue-600" onclick="document.getElementById('fileInput').click()">
+        Browse Files
+      </button>
+    </div>
+    <div id="dropResult" class="mt-4 hidden">
+      <div class="rounded-lg border border-slate-800 bg-slate-950 p-3">
+        <div class="text-sm font-semibold text-emerald-400 mb-2" id="dropResultTitle"></div>
+        <pre id="dropResultContent" class="text-xs text-slate-300 whitespace-pre-wrap"></pre>
+      </div>
+    </div>
+  </section>
 
   <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
     <section class="rounded-xl border border-slate-800 bg-slate-900/30 p-4">

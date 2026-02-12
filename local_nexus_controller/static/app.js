@@ -761,3 +761,125 @@ async function lncResolvePortConflicts(reloadAfter = false) {
     alert(String(e.message || e));
   }
 }
+
+// Drag and drop file import
+function initDragAndDrop() {
+  const dropZone = document.getElementById("dropZone");
+  const fileInput = document.getElementById("fileInput");
+  const dropResult = document.getElementById("dropResult");
+  const dropResultTitle = document.getElementById("dropResultTitle");
+  const dropResultContent = document.getElementById("dropResultContent");
+
+  if (!dropZone || !fileInput) return;
+
+  // Prevent default drag behaviors
+  ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
+    dropZone.addEventListener(eventName, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+  });
+
+  // Highlight drop zone when item is dragged over it
+  ["dragenter", "dragover"].forEach((eventName) => {
+    dropZone.addEventListener(eventName, () => {
+      dropZone.classList.add("border-blue-500", "bg-blue-900/20");
+    });
+  });
+
+  ["dragleave", "drop"].forEach((eventName) => {
+    dropZone.addEventListener(eventName, () => {
+      dropZone.classList.remove("border-blue-500", "bg-blue-900/20");
+    });
+  });
+
+  // Handle dropped files
+  dropZone.addEventListener("drop", (e) => {
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      handleFileUpload(files[0]);
+    }
+  });
+
+  // Handle file input change
+  fileInput.addEventListener("change", (e) => {
+    if (e.target.files.length > 0) {
+      handleFileUpload(e.target.files[0]);
+    }
+  });
+
+  async function handleFileUpload(file) {
+    if (!dropResult || !dropResultTitle || !dropResultContent) return;
+
+    dropResultTitle.textContent = "Processing " + file.name + "...";
+    dropResultContent.textContent = "";
+    dropResult.classList.remove("hidden");
+
+    try {
+      if (file.name.endsWith(".json")) {
+        // Handle JSON bundle
+        const text = await file.text();
+        const bundle = JSON.parse(text);
+        const data = await lncFetchJson("/api/import/bundle", {
+          method: "POST",
+          body: JSON.stringify(bundle),
+        });
+
+        dropResultTitle.textContent = "Successfully imported: " + file.name;
+        const serviceInfo = data.service || {};
+        const localUrl = serviceInfo.local_url || "";
+        const serviceName = serviceInfo.name || "Service";
+        const port = serviceInfo.port || "N/A";
+
+        let message = serviceName + " imported successfully!\n\n";
+        message += "Port: " + port + "\n";
+        if (localUrl) {
+          message += "URL: " + localUrl + "\n\n";
+          message += "Click here to launch: ";
+          dropResultContent.textContent = message;
+
+          // Add clickable link
+          const linkEl = document.createElement("a");
+          linkEl.href = localUrl;
+          linkEl.target = "_blank";
+          linkEl.className = "underline text-blue-400 hover:text-blue-300";
+          linkEl.textContent = localUrl;
+          dropResultContent.appendChild(linkEl);
+
+          const detailsEl = document.createElement("div");
+          detailsEl.className = "mt-3 text-slate-400";
+          detailsEl.textContent = "\n\nGo to Services page to start/stop this service.";
+          dropResultContent.appendChild(detailsEl);
+        } else {
+          message += "\nGo to Services page to start/stop this service.";
+          dropResultContent.textContent = message;
+        }
+      } else if (file.name.endsWith(".zip")) {
+        // Handle ZIP file - for now, show error
+        dropResultTitle.textContent = "ZIP import not yet implemented";
+        dropResultContent.textContent =
+          "ZIP file import is coming soon. For now, please:\n" +
+          "1. Extract the ZIP file\n" +
+          "2. Look for a local-nexus.bundle.json file\n" +
+          "3. Drag and drop that JSON file here";
+      } else {
+        dropResultTitle.textContent = "Unsupported file type";
+        dropResultContent.textContent =
+          "Please upload a .json bundle file or .zip archive.";
+      }
+    } catch (e) {
+      dropResultTitle.textContent = "Import failed";
+      dropResultContent.textContent = String(e.message || e);
+    }
+
+    // Reset file input
+    fileInput.value = "";
+  }
+}
+
+// Initialize drag and drop when DOM is ready
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initDragAndDrop);
+} else {
+  initDragAndDrop();
+}
