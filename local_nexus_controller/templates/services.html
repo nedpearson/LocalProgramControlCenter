@@ -46,16 +46,19 @@
           </td>
           <td class="px-4 py-3">
             {% if s.local_url %}
-              <a class="underline text-slate-300 hover:text-white" href="{{ s.local_url }}" target="_blank">{{ s.local_url }}</a>
+              <a class="underline text-blue-400 hover:text-blue-300" href="{{ s.local_url }}" target="_blank">Open →</a>
             {% else %}
               <span class="text-slate-500">—</span>
             {% endif %}
           </td>
           <td class="px-4 py-3">
             <div class="flex flex-wrap gap-2">
-              <button class="btn" onclick="lncServiceAction('{{ s.id }}','start')">Start</button>
-              <button class="btn" onclick="lncServiceAction('{{ s.id }}','stop')">Stop</button>
-              <button class="btn" onclick="lncServiceAction('{{ s.id }}','restart')">Restart</button>
+              {% if s.local_url %}
+                <a href="{{ s.local_url }}" target="_blank" class="btn bg-blue-600 hover:bg-blue-700 border-blue-600 text-xs px-2 py-1">Launch</a>
+              {% endif %}
+              <button class="btn text-xs px-2 py-1" onclick="lncServiceAction('{{ s.id }}','start')">Start</button>
+              <button class="btn text-xs px-2 py-1" onclick="lncServiceAction('{{ s.id }}','stop')">Stop</button>
+              <button class="btn text-xs px-2 py-1" onclick="lncServiceAction('{{ s.id }}','restart')">Restart</button>
             </div>
           </td>
         </tr>

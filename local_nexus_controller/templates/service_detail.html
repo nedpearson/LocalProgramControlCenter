@@ -9,6 +9,11 @@
       <div class="text-xs text-slate-500 mt-2">ID: {{ service.id }}</div>
     </div>
     <div class="flex flex-wrap gap-2">
+      {% if service.local_url %}
+        <a href="{{ service.local_url }}" target="_blank" class="btn bg-blue-600 hover:bg-blue-700 border-blue-600">
+          🚀 Launch Application
+        </a>
+      {% endif %}
       <button class="btn" onclick="lncServiceAction('{{ service.id }}','start', true)">Start</button>
       <button class="btn" onclick="lncServiceAction('{{ service.id }}','stop', true)">Stop</button>
       <button class="btn" onclick="lncServiceAction('{{ service.id }}','restart', true)">Restart</button>

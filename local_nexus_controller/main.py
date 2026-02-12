@@ -5,7 +5,11 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from local_nexus_controller.db import init_db
+from sqlmodel import Session, select
+
+from local_nexus_controller.db import engine, init_db
+from local_nexus_controller.models import Service
+from local_nexus_controller.routers.api_autodiscovery import router as api_autodiscovery_router
 from local_nexus_controller.routers.api_databases import router as api_databases_router
 from local_nexus_controller.routers.api_import import router as api_import_router
 from local_nexus_controller.routers.api_keys import router as api_keys_router
@@ -13,6 +17,11 @@ from local_nexus_controller.routers.api_ports import router as api_ports_router
 from local_nexus_controller.routers.api_services import router as api_services_router
 from local_nexus_controller.routers.api_summary import router as api_summary_router
 from local_nexus_controller.routers.ui import router as ui_router
+from local_nexus_controller.services.auto_discovery import scan_repository_folder
+from local_nexus_controller.services.file_watcher import start_file_watcher
+from local_nexus_controller.services.process_manager import start_service
+from local_nexus_controller.services.registry_import import import_bundle
+from local_nexus_controller.settings import settings
 
 
 app = FastAPI(title="Local Nexus Controller", version="0.1.0")
@@ -27,8 +36,55 @@ app.include_router(api_ports_router, prefix="/api/ports", tags=["ports"])
 app.include_router(api_keys_router, prefix="/api/keys", tags=["keys"])
 app.include_router(api_import_router, prefix="/api/import", tags=["import"])
 app.include_router(api_summary_router, prefix="/api/summary", tags=["summary"])
+app.include_router(api_autodiscovery_router, prefix="/api/autodiscovery", tags=["autodiscovery"])
 
 
 @app.on_event("startup")
 def _startup() -> None:
     init_db()
+
+    # Auto-discovery: scan repositories folder on startup
+    if settings.auto_discovery_enabled and settings.repositories_folder:
+        if settings.repositories_folder.exists():
+            print(f"Auto-discovery: scanning {settings.repositories_folder}")
+            with Session(engine) as session:
+                existing_services = list(session.exec(select(Service)))
+                existing_ports = {s.port for s in existing_services if s.port is not None}
+                existing_names = {s.name for s in existing_services}
+
+                bundles = scan_repository_folder(str(settings.repositories_folder), existing_ports)
+
+                # Only import new services
+                imported = 0
+                for bundle in bundles:
+                    if bundle.service.name not in existing_names:
+                        try:
+                            import_bundle(session, bundle)
+                            imported += 1
+                        except Exception as e:
+                            print(f"Failed to import {bundle.service.name}: {e}")
+
+                session.commit()
+                print(f"Auto-discovery: imported {imported} new services")
+
+    # File watcher: start watching for ZIP files
+    if settings.file_watcher_enabled and settings.file_watcher_folder and settings.repositories_folder:
+        if settings.file_watcher_folder.exists():
+            start_file_watcher(
+                str(settings.file_watcher_folder),
+                str(settings.repositories_folder),
+            )
+
+    # Auto-start all services on boot
+    if settings.auto_start_all_on_boot:
+        print("Auto-start: starting all services")
+        with Session(engine) as session:
+            services = list(session.exec(select(Service)))
+            for svc in services:
+                if svc.start_command and svc.status != "running":
+                    try:
+                        start_service(session, svc)
+                        print(f"Started: {svc.name}")
+                    except Exception as e:
+                        print(f"Failed to start {svc.name}: {e}")
+            session.commit()

@@ -26,6 +26,11 @@ class Settings:
     log_dir: Path
     reload: bool
     open_browser: bool
+    repositories_folder: Path | None
+    auto_discovery_enabled: bool
+    file_watcher_enabled: bool
+    file_watcher_folder: Path | None
+    auto_start_all_on_boot: bool
 
 
 def load_settings() -> Settings:
@@ -61,6 +66,19 @@ def load_settings() -> Settings:
     if os.getenv("LOCAL_NEXUS_OPEN_BROWSER") is None:
         open_browser = open_browser_default
 
+    # Auto-discovery and file watcher settings
+    repositories_folder_raw = os.getenv("LOCAL_NEXUS_REPOSITORIES_FOLDER")
+    repositories_folder = Path(repositories_folder_raw) if repositories_folder_raw else None
+
+    auto_discovery_enabled = (os.getenv("LOCAL_NEXUS_AUTO_DISCOVERY_ENABLED", "") or "").lower() in {"1", "true", "yes", "on"}
+
+    file_watcher_enabled = (os.getenv("LOCAL_NEXUS_FILE_WATCHER_ENABLED", "") or "").lower() in {"1", "true", "yes", "on"}
+
+    file_watcher_folder_raw = os.getenv("LOCAL_NEXUS_FILE_WATCHER_FOLDER")
+    file_watcher_folder = Path(file_watcher_folder_raw) if file_watcher_folder_raw else None
+
+    auto_start_all_on_boot = (os.getenv("LOCAL_NEXUS_AUTO_START_ALL_ON_BOOT", "") or "").lower() in {"1", "true", "yes", "on"}
+
     return Settings(
         project_root=project_root,
         db_path=db_path,
@@ -72,6 +90,11 @@ def load_settings() -> Settings:
         log_dir=log_dir,
         reload=reload,
         open_browser=open_browser,
+        repositories_folder=repositories_folder,
+        auto_discovery_enabled=auto_discovery_enabled,
+        file_watcher_enabled=file_watcher_enabled,
+        file_watcher_folder=file_watcher_folder,
+        auto_start_all_on_boot=auto_start_all_on_boot,
     )
 
 
