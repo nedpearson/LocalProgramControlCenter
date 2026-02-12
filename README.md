@@ -4,6 +4,22 @@ Local Nexus Controller is a **Windows-friendly local dashboard + API** to **regi
 
 ---
 
+## ⚡ Complete Automation Setup
+
+**Want everything to start automatically when Windows boots?**
+
+👉 **Double-click:** `SETUP_COMPLETE_AUTOMATION.bat`
+
+**Result:**
+- Controller starts on Windows boot
+- All services start automatically
+- Dashboard opens in browser
+- Zero manual steps!
+
+**See:** [COMPLETE_AUTOMATION_GUIDE.md](COMPLETE_AUTOMATION_GUIDE.md)
+
+---
+
 ## 🚨 Having Issues?
 
 ### Startup Errors After Reboot?
@@ -12,7 +28,6 @@ Local Nexus Controller is a **Windows-friendly local dashboard + API** to **regi
 **Quick fixes:**
 - **Find project path:** Double-click `WHERE_AM_I.bat`
 - **Clean old broken startup:** Run `tools\cleanup_old_startup.ps1`
-- **Enable Windows auto-start:** Double-click `tools\ENABLE_AUTO_START.bat`
 
 ### Services Not Auto-Starting?
 **See:** [AUTO_START_TROUBLESHOOTING.md](AUTO_START_TROUBLESHOOTING.md)
@@ -20,7 +35,6 @@ Local Nexus Controller is a **Windows-friendly local dashboard + API** to **regi
 **Quick diagnostic:**
 - **Check config:** Double-click `CHECK_AUTO_START.bat`
 - **View service logs:** Check `data/logs/` folder
-- **Dashboard:** http://localhost:5010 → Services page
 
 ---
 
