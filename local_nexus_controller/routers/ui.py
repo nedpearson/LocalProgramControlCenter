@@ -21,22 +21,23 @@ templates = Jinja2Templates(directory=str(Path(__file__).resolve().parents[1] / 
 
 @router.get("/", response_class=HTMLResponse)
 def dashboard(request: Request, session: Session = Depends(get_session)) -> HTMLResponse:
-    services = list(session.exec(select(Service)))
+    services = list(session.exec(select(Service).order_by(Service.name)))
     dbs = list(session.exec(select(Database)))
     keys = list(session.exec(select(KeyRef)))
 
-    running = 0
-    stopped = 0
-    error = 0
+    running_services = []
+    stopped_services = []
+    error_services = []
     alerts: list[str] = []
+
     for svc in services:
         refresh_status(session, svc)
         if svc.status == "running":
-            running += 1
+            running_services.append(svc)
         elif svc.status == "error":
-            error += 1
+            error_services.append(svc)
         else:
-            stopped += 1
+            stopped_services.append(svc)
 
         if svc.port is not None and is_port_in_use("127.0.0.1", int(svc.port)) and svc.status != "running":
             alerts.append(f"Port conflict: {svc.name} reserved {svc.port} but is not running.")
@@ -51,13 +52,16 @@ def dashboard(request: Request, session: Session = Depends(get_session)) -> HTML
         {
             "totals": {
                 "services": len(services),
-                "running": running,
-                "stopped": stopped,
-                "error": error,
+                "running": len(running_services),
+                "stopped": len(stopped_services),
+                "error": len(error_services),
                 "databases": len(dbs),
                 "keys": len(keys),
                 "ports_reserved": len([s for s in services if s.port is not None]),
             },
+            "running_services": running_services,
+            "stopped_services": stopped_services[:10],
+            "error_services": error_services,
             "alerts": alerts[:10],
         },
     )

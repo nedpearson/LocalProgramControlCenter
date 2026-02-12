@@ -14,23 +14,31 @@ router = APIRouter()
 
 @router.get("")
 def summary(session: Session = Depends(get_session)) -> dict:
-    services = list(session.exec(select(Service)))
+    services = list(session.exec(select(Service).order_by(Service.name)))
     dbs = list(session.exec(select(Database)))
     keys = list(session.exec(select(KeyRef)))
 
-    running = 0
-    stopped = 0
-    error = 0
+    running_services = []
+    stopped_services = []
+    error_services = []
     alerts: list[dict] = []
 
     for svc in services:
         refresh_status(session, svc)
+        svc_data = {
+            "id": svc.id,
+            "name": svc.name,
+            "port": svc.port,
+            "status": svc.status,
+            "has_start_command": bool(svc.start_command),
+        }
+
         if svc.status == "running":
-            running += 1
+            running_services.append(svc_data)
         elif svc.status == "error":
-            error += 1
+            error_services.append(svc_data)
         else:
-            stopped += 1
+            stopped_services.append(svc_data)
 
         if svc.port is not None:
             in_use = is_port_in_use("127.0.0.1", int(svc.port))
@@ -43,7 +51,7 @@ def summary(session: Session = Depends(get_session)) -> dict:
                     }
                 )
 
-        if not svc.start_command:
+        if not svc.start_command and (svc.category or "").lower() not in {"repo", "repos"}:
             alerts.append(
                 {
                     "type": "missing_start_command",
@@ -52,23 +60,20 @@ def summary(session: Session = Depends(get_session)) -> dict:
                 }
             )
 
-        if svc.config_paths is not None and len(svc.config_paths) == 0:
-            # Not necessarily an error; keep low severity
-            pass
-
     session.commit()
 
     ports_in_use = len([s for s in services if s.port is not None])
 
     return {
-        "totals": {
-            "services": len(services),
-            "running": running,
-            "stopped": stopped,
-            "error": error,
-            "databases": len(dbs),
-            "keys": len(keys),
-            "ports_reserved": ports_in_use,
-        },
+        "services": len(services),
+        "running": len(running_services),
+        "stopped": len(stopped_services),
+        "error": len(error_services),
+        "databases": len(dbs),
+        "keys": len(keys),
+        "ports_reserved": ports_in_use,
+        "running_services": running_services,
+        "stopped_services": stopped_services[:10],
+        "error_services": error_services,
         "alerts": alerts,
     }

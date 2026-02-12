@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Dashboard • Local Nexus Controller{% endblock %}
+{% block title %}Dashboard - Local Nexus Controller{% endblock %}
 
 {% block content %}
   <div class="lnc-pagehead flex items-start justify-between gap-3">
@@ -7,63 +7,298 @@
       <h1 class="lnc-h1 text-2xl font-semibold">Dashboard</h1>
       <p class="lnc-subtitle text-slate-400 text-sm mt-1">Unified view of your locally hosted programs and registries.</p>
     </div>
-    <div class="text-right">
+    <div class="flex items-center gap-3">
+      <div id="liveIndicator" class="flex items-center gap-2 text-xs text-slate-400">
+        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+        <span>Live</span>
+      </div>
       <a class="lnc-link text-sm text-slate-300 hover:text-white underline" href="/import">Import bundle</a>
     </div>
   </div>
 
-  <div class="lnc-stats-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-6">
-    <div class="lnc-card rounded-xl border border-slate-800 bg-slate-900/40 p-4">
-      <div class="text-xs text-slate-400">Total services</div>
-      <div class="lnc-metric text-2xl font-semibold mt-1">{{ totals.services }}</div>
-    </div>
-    <div class="lnc-card rounded-xl border border-slate-800 bg-slate-900/40 p-4">
-      <div class="text-xs text-slate-400">Running</div>
-      <div class="lnc-metric text-2xl font-semibold mt-1">{{ totals.running }}</div>
-    </div>
-    <div class="lnc-card rounded-xl border border-slate-800 bg-slate-900/40 p-4">
-      <div class="text-xs text-slate-400">Stopped</div>
-      <div class="lnc-metric text-2xl font-semibold mt-1">{{ totals.stopped }}</div>
-    </div>
-    <div class="lnc-card rounded-xl border border-slate-800 bg-slate-900/40 p-4">
-      <div class="text-xs text-slate-400">Databases</div>
-      <div class="lnc-metric text-2xl font-semibold mt-1">{{ totals.databases }}</div>
-    </div>
-    <div class="lnc-card rounded-xl border border-slate-800 bg-slate-900/40 p-4">
-      <div class="text-xs text-slate-400">Ports reserved</div>
-      <div class="lnc-metric text-2xl font-semibold mt-1">{{ totals.ports_reserved }}</div>
-    </div>
-  </div>
-
-  <div class="lnc-sections mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <section class="lnc-panel rounded-xl border border-slate-800 bg-slate-900/30 p-4">
-      <h2 class="font-semibold">Alerts</h2>
-      {% if alerts and alerts|length > 0 %}
-        <ul class="lnc-list mt-3 space-y-2 text-sm">
-          {%- for a in alerts -%}
-          <li class="rounded-lg border border-amber-900/60 bg-amber-900/10 px-3 py-2 text-amber-200">
-            {{ a }}
-          </li>
-          {%- endfor -%}
-        </ul>
-      {% else %}
-        <p class="lnc-muted mt-3 text-sm text-slate-400">No alerts.</p>
-      {% endif %}
-    </section>
-
-    <section class="lnc-panel rounded-xl border border-slate-800 bg-slate-900/30 p-4">
-      <h2 class="font-semibold">Next actions</h2>
-      <div class="lnc-list mt-3 space-y-2 text-sm text-slate-300">
-        <div>
-          - Use <a class="underline hover:text-white" href="/services">Service Explorer</a> to start/stop/restart.
-        </div>
-        <div>
-          - Use <a class="underline hover:text-white" href="/ports">Port Explorer</a> to detect conflicts.
-        </div>
-        <div>
-          - Use <a class="underline hover:text-white" href="/keys">Keys Explorer</a> to maintain env references.
-        </div>
+  <div id="dashboardContent">
+    <div class="lnc-stats-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-6">
+      <div class="lnc-card rounded-xl border border-slate-800 bg-slate-900/40 p-4">
+        <div class="text-xs text-slate-400">Total services</div>
+        <div class="lnc-metric text-2xl font-semibold mt-1" id="statTotal">{{ totals.services }}</div>
       </div>
-    </section>
+      <div class="lnc-card rounded-xl border border-green-900/50 bg-green-900/10 p-4">
+        <div class="text-xs text-green-400">Running</div>
+        <div class="lnc-metric text-2xl font-semibold mt-1 text-green-400" id="statRunning">{{ totals.running }}</div>
+      </div>
+      <div class="lnc-card rounded-xl border border-slate-800 bg-slate-900/40 p-4">
+        <div class="text-xs text-slate-400">Stopped</div>
+        <div class="lnc-metric text-2xl font-semibold mt-1" id="statStopped">{{ totals.stopped }}</div>
+      </div>
+      <div class="lnc-card rounded-xl border border-slate-800 bg-slate-900/40 p-4">
+        <div class="text-xs text-slate-400">Databases</div>
+        <div class="lnc-metric text-2xl font-semibold mt-1" id="statDatabases">{{ totals.databases }}</div>
+      </div>
+      <div class="lnc-card rounded-xl border border-slate-800 bg-slate-900/40 p-4">
+        <div class="text-xs text-slate-400">Ports reserved</div>
+        <div class="lnc-metric text-2xl font-semibold mt-1" id="statPorts">{{ totals.ports_reserved }}</div>
+      </div>
+    </div>
+
+    <div class="lnc-sections mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <section class="lnc-panel rounded-xl border border-green-900/50 bg-green-900/5 p-4">
+        <div class="flex items-center justify-between">
+          <h2 class="font-semibold text-green-400">Running Services</h2>
+          <span class="text-xs text-slate-500">Click to launch</span>
+        </div>
+        <div id="runningServices" class="mt-3">
+          {% if running_services and running_services|length > 0 %}
+            <div class="space-y-2">
+              {%- for svc in running_services -%}
+              <div class="flex items-center justify-between gap-3 rounded-lg border border-green-900/40 bg-green-900/10 px-3 py-2">
+                <div class="flex items-center gap-3 min-w-0">
+                  <span class="w-2 h-2 rounded-full bg-green-500 shrink-0"></span>
+                  <a href="/services/{{ svc.id }}" class="text-sm font-medium text-slate-200 hover:text-white truncate">{{ svc.name }}</a>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                  {% if svc.port %}
+                  <a href="http://localhost:{{ svc.port }}" target="_blank" rel="noopener"
+                     class="px-2 py-1 text-xs bg-green-600 hover:bg-green-500 text-white rounded transition-colors">
+                    :{{ svc.port }}
+                  </a>
+                  {% endif %}
+                  <button onclick="lncServiceAction('{{ svc.id }}', 'stop', true)"
+                          class="px-2 py-1 text-xs bg-slate-700 hover:bg-red-600 text-slate-300 hover:text-white rounded transition-colors">
+                    Stop
+                  </button>
+                </div>
+              </div>
+              {%- endfor -%}
+            </div>
+          {% else %}
+            <p class="lnc-muted text-sm text-slate-400">No services running.</p>
+          {% endif %}
+        </div>
+      </section>
+
+      <section class="lnc-panel rounded-xl border border-slate-800 bg-slate-900/30 p-4">
+        <div class="flex items-center justify-between">
+          <h2 class="font-semibold">Quick Start</h2>
+          <span class="text-xs text-slate-500">Stopped services</span>
+        </div>
+        <div id="stoppedServices" class="mt-3">
+          {% if stopped_services and stopped_services|length > 0 %}
+            <div class="space-y-2">
+              {%- for svc in stopped_services -%}
+              <div class="flex items-center justify-between gap-3 rounded-lg border border-slate-800 bg-slate-900/40 px-3 py-2">
+                <div class="flex items-center gap-3 min-w-0">
+                  <span class="w-2 h-2 rounded-full bg-slate-500 shrink-0"></span>
+                  <a href="/services/{{ svc.id }}" class="text-sm font-medium text-slate-300 hover:text-white truncate">{{ svc.name }}</a>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                  {% if svc.port %}
+                  <span class="text-xs text-slate-500">:{{ svc.port }}</span>
+                  {% endif %}
+                  {% if svc.start_command %}
+                  <button onclick="lncServiceAction('{{ svc.id }}', 'start', true)"
+                          class="px-2 py-1 text-xs bg-green-700 hover:bg-green-600 text-white rounded transition-colors">
+                    Start
+                  </button>
+                  {% else %}
+                  <span class="text-xs text-slate-500">No command</span>
+                  {% endif %}
+                </div>
+              </div>
+              {%- endfor -%}
+            </div>
+            {% if totals.stopped > 10 %}
+            <div class="mt-2 text-xs text-slate-500">
+              <a href="/services" class="hover:text-white underline">View all {{ totals.stopped }} stopped services</a>
+            </div>
+            {% endif %}
+          {% else %}
+            <p class="lnc-muted text-sm text-slate-400">All services are running or no services registered.</p>
+          {% endif %}
+        </div>
+      </section>
+    </div>
+
+    <div class="lnc-sections mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {% if error_services and error_services|length > 0 %}
+      <section class="lnc-panel rounded-xl border border-red-900/50 bg-red-900/10 p-4">
+        <h2 class="font-semibold text-red-400">Services with Errors</h2>
+        <div class="mt-3 space-y-2">
+          {%- for svc in error_services -%}
+          <div class="flex items-center justify-between gap-3 rounded-lg border border-red-900/40 bg-red-900/10 px-3 py-2">
+            <div class="flex items-center gap-3 min-w-0">
+              <span class="w-2 h-2 rounded-full bg-red-500 shrink-0"></span>
+              <a href="/services/{{ svc.id }}" class="text-sm font-medium text-slate-200 hover:text-white truncate">{{ svc.name }}</a>
+            </div>
+            <button onclick="lncServiceAction('{{ svc.id }}', 'restart', true)"
+                    class="px-2 py-1 text-xs bg-amber-700 hover:bg-amber-600 text-white rounded transition-colors shrink-0">
+              Restart
+            </button>
+          </div>
+          {%- endfor -%}
+        </div>
+      </section>
+      {% endif %}
+
+      <section class="lnc-panel rounded-xl border border-slate-800 bg-slate-900/30 p-4">
+        <h2 class="font-semibold">Alerts</h2>
+        {% if alerts and alerts|length > 0 %}
+          <ul class="lnc-list mt-3 space-y-2 text-sm">
+            {%- for a in alerts -%}
+            <li class="rounded-lg border border-amber-900/60 bg-amber-900/10 px-3 py-2 text-amber-200">
+              {{ a }}
+            </li>
+            {%- endfor -%}
+          </ul>
+        {% else %}
+          <p class="lnc-muted mt-3 text-sm text-slate-400">No alerts.</p>
+        {% endif %}
+      </section>
+
+      <section class="lnc-panel rounded-xl border border-slate-800 bg-slate-900/30 p-4">
+        <h2 class="font-semibold">Quick Links</h2>
+        <div class="lnc-list mt-3 space-y-2 text-sm text-slate-300">
+          <div>
+            <a class="underline hover:text-white" href="/services">Service Explorer</a> - start/stop/restart services
+          </div>
+          <div>
+            <a class="underline hover:text-white" href="/ports">Port Explorer</a> - detect conflicts
+          </div>
+          <div>
+            <a class="underline hover:text-white" href="/keys">Keys Explorer</a> - maintain env references
+          </div>
+          <div>
+            <a class="underline hover:text-white" href="/databases">Databases</a> - view database connections
+          </div>
+        </div>
+      </section>
+    </div>
   </div>
+
+  <script>
+    (function() {
+      let refreshInterval = 3000;
+      let refreshTimer = null;
+      let isRefreshing = false;
+
+      function escapeHtml(s) {
+        return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+
+      function renderRunningServices(services) {
+        const container = document.getElementById('runningServices');
+        if (!container) return;
+
+        if (!services || services.length === 0) {
+          container.innerHTML = '<p class="lnc-muted text-sm text-slate-400">No services running.</p>';
+          return;
+        }
+
+        const html = services.map(svc => `
+          <div class="flex items-center justify-between gap-3 rounded-lg border border-green-900/40 bg-green-900/10 px-3 py-2">
+            <div class="flex items-center gap-3 min-w-0">
+              <span class="w-2 h-2 rounded-full bg-green-500 shrink-0"></span>
+              <a href="/services/${escapeHtml(svc.id)}" class="text-sm font-medium text-slate-200 hover:text-white truncate">${escapeHtml(svc.name)}</a>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              ${svc.port ? `<a href="http://localhost:${svc.port}" target="_blank" rel="noopener" class="px-2 py-1 text-xs bg-green-600 hover:bg-green-500 text-white rounded transition-colors">:${svc.port}</a>` : ''}
+              <button onclick="lncServiceAction('${escapeHtml(svc.id)}', 'stop', true)" class="px-2 py-1 text-xs bg-slate-700 hover:bg-red-600 text-slate-300 hover:text-white rounded transition-colors">Stop</button>
+            </div>
+          </div>
+        `).join('');
+
+        container.innerHTML = `<div class="space-y-2">${html}</div>`;
+      }
+
+      function renderStoppedServices(services, totalStopped) {
+        const container = document.getElementById('stoppedServices');
+        if (!container) return;
+
+        if (!services || services.length === 0) {
+          container.innerHTML = '<p class="lnc-muted text-sm text-slate-400">All services are running or no services registered.</p>';
+          return;
+        }
+
+        const html = services.map(svc => `
+          <div class="flex items-center justify-between gap-3 rounded-lg border border-slate-800 bg-slate-900/40 px-3 py-2">
+            <div class="flex items-center gap-3 min-w-0">
+              <span class="w-2 h-2 rounded-full bg-slate-500 shrink-0"></span>
+              <a href="/services/${escapeHtml(svc.id)}" class="text-sm font-medium text-slate-300 hover:text-white truncate">${escapeHtml(svc.name)}</a>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              ${svc.port ? `<span class="text-xs text-slate-500">:${svc.port}</span>` : ''}
+              ${svc.has_start_command ? `<button onclick="lncServiceAction('${escapeHtml(svc.id)}', 'start', true)" class="px-2 py-1 text-xs bg-green-700 hover:bg-green-600 text-white rounded transition-colors">Start</button>` : '<span class="text-xs text-slate-500">No command</span>'}
+            </div>
+          </div>
+        `).join('');
+
+        let footer = '';
+        if (totalStopped > 10) {
+          footer = `<div class="mt-2 text-xs text-slate-500"><a href="/services" class="hover:text-white underline">View all ${totalStopped} stopped services</a></div>`;
+        }
+
+        container.innerHTML = `<div class="space-y-2">${html}</div>${footer}`;
+      }
+
+      async function refreshDashboard() {
+        if (isRefreshing) return;
+        isRefreshing = true;
+
+        try {
+          const res = await fetch('/api/summary');
+          if (!res.ok) throw new Error('Failed to fetch');
+          const data = await res.json();
+
+          document.getElementById('statTotal').textContent = data.services || 0;
+          document.getElementById('statRunning').textContent = data.running || 0;
+          document.getElementById('statStopped').textContent = data.stopped || 0;
+          document.getElementById('statDatabases').textContent = data.databases || 0;
+          document.getElementById('statPorts').textContent = data.ports_reserved || 0;
+
+          renderRunningServices(data.running_services || []);
+          renderStoppedServices(data.stopped_services || [], data.stopped || 0);
+
+          updateIndicator(true);
+        } catch (e) {
+          updateIndicator(false);
+        } finally {
+          isRefreshing = false;
+        }
+      }
+
+      function updateIndicator(connected) {
+        const indicator = document.getElementById('liveIndicator');
+        if (!indicator) return;
+        const dot = indicator.querySelector('span:first-child');
+        const text = indicator.querySelector('span:last-child');
+        if (connected) {
+          dot.className = 'w-2 h-2 rounded-full bg-green-500 animate-pulse';
+          text.textContent = 'Live';
+        } else {
+          dot.className = 'w-2 h-2 rounded-full bg-red-500';
+          text.textContent = 'Offline';
+        }
+      }
+
+      function startLiveUpdates() {
+        if (refreshTimer) clearInterval(refreshTimer);
+        refreshTimer = setInterval(refreshDashboard, refreshInterval);
+      }
+
+      function handleVisibilityChange() {
+        if (document.hidden) {
+          if (refreshTimer) clearInterval(refreshTimer);
+        } else {
+          startLiveUpdates();
+        }
+      }
+
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', startLiveUpdates);
+      } else {
+        startLiveUpdates();
+      }
+    })();
+  </script>
 {% endblock %}
