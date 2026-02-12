@@ -17,6 +17,8 @@ from local_nexus_controller.services.process_manager import refresh_status
 router = APIRouter(include_in_schema=False)
 
 templates = Jinja2Templates(directory=str(Path(__file__).resolve().parents[1] / "templates"))
+templates.env.auto_reload = True
+templates.env.cache = {}
 
 
 @router.get("/", response_class=HTMLResponse)
