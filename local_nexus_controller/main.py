@@ -84,12 +84,24 @@ def _startup() -> None:
         try:
             with Session(engine) as session:
                 services = list(session.exec(select(Service)))
-                for svc in services:
-                    if svc.start_command and svc.status != "running":
+                startable_services = [s for s in services if s.start_command and s.status != "running"]
+
+                if startable_services:
+                    print(f"\n{'=' * 60}")
+                    print(f"Auto-starting {len(startable_services)} service(s)")
+                    print(f"{'=' * 60}")
+                    for svc in startable_services:
                         try:
+                            print(f"  Starting: {svc.name}...", end=" ", flush=True)
                             start_service(session, svc)
-                        except Exception:
-                            pass
-                session.commit()
-        except Exception:
-            pass
+                            print("✓ Started")
+                        except Exception as e:
+                            print(f"✗ Error: {e}")
+                    session.commit()
+                    print(f"{'=' * 60}")
+                    print(f"Auto-start complete")
+                    print(f"{'=' * 60}\n")
+                else:
+                    print("\nNo services to auto-start (all services already running or no start commands defined)\n")
+        except Exception as e:
+            print(f"Auto-start error: {e}")

@@ -4,14 +4,23 @@ Local Nexus Controller is a **Windows-friendly local dashboard + API** to **regi
 
 ---
 
-## 🚨 Having Startup Issues After Reboot?
+## 🚨 Having Issues?
 
-**See:** [START_HERE_AFTER_REBOOT.md](START_HERE_AFTER_REBOOT.md) - Fixes all common startup errors
+### Startup Errors After Reboot?
+**See:** [START_HERE_AFTER_REBOOT.md](START_HERE_AFTER_REBOOT.md)
 
 **Quick fixes:**
 - **Find project path:** Double-click `WHERE_AM_I.bat`
-- **Clean old broken startup:** Run `tools\cleanup_old_startup.ps1` in PowerShell
-- **Enable auto-start:** Double-click `tools\ENABLE_AUTO_START.bat`
+- **Clean old broken startup:** Run `tools\cleanup_old_startup.ps1`
+- **Enable Windows auto-start:** Double-click `tools\ENABLE_AUTO_START.bat`
+
+### Services Not Auto-Starting?
+**See:** [AUTO_START_TROUBLESHOOTING.md](AUTO_START_TROUBLESHOOTING.md)
+
+**Quick diagnostic:**
+- **Check config:** Double-click `CHECK_AUTO_START.bat`
+- **View service logs:** Check `data/logs/` folder
+- **Dashboard:** http://localhost:5010 → Services page
 
 ---
 
