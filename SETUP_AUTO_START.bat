@@ -1,21 +1,25 @@
 @echo off
-REM One-click setup for auto-start on Windows boot
-
-echo ============================================================
-echo Local Nexus Controller - Auto-Start Setup
-echo ============================================================
+cls
 echo.
-echo This will configure Windows to automatically start the
-echo controller when you log in.
+echo ═══════════════════════════════════════════════════════════════
+echo   Setting Up Auto-Start
+echo ═══════════════════════════════════════════════════════════════
+echo.
+echo This will configure the application to start automatically
+echo when you log in to Windows.
 echo.
 echo IMPORTANT: This requires administrator privileges.
 echo.
 pause
-
-REM Run the PowerShell setup script as administrator
-powershell -ExecutionPolicy Bypass -Command "Start-Process powershell -Verb RunAs -ArgumentList '-ExecutionPolicy Bypass -File \"%~dp0tools\setup_auto_start.ps1\"'"
-
 echo.
-echo Setup initiated. Check the administrator window for progress.
+echo Running setup script...
+powershell -ExecutionPolicy Bypass -Command "Start-Process powershell -Verb RunAs -ArgumentList '-ExecutionPolicy Bypass -File \"%~dp0tools\setup_auto_start.ps1\"'"
+echo.
+echo ═══════════════════════════════════════════════════════════════
+echo   Setup Complete!
+echo ═══════════════════════════════════════════════════════════════
+echo.
+echo The application will now start automatically when you log in.
+echo Check the administrator window for progress.
 echo.
 pause
