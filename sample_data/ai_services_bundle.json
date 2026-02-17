@@ -1,0 +1,74 @@
+[
+  {
+    "service": {
+      "name": "AI Financial Advisor",
+      "description": "AI-powered financial advisory service providing investment advice and portfolio analysis",
+      "category": "ai-services",
+      "tags": ["ai", "finance", "advisory", "fastapi"],
+      "tech_stack": ["python", "fastapi", "uvicorn"],
+      "dependencies": [],
+      "config_paths": ["/home/user/LocalProgramControlCenter/ai-financial-advisor/.env"],
+      "port": 5020,
+      "local_url": "http://127.0.0.1:5020",
+      "healthcheck_url": "http://127.0.0.1:5020/health",
+      "working_directory": "/home/user/LocalProgramControlCenter/ai-financial-advisor",
+      "start_command": "uvicorn app.main:app --host {HOST} --port {PORT}",
+      "stop_command": "",
+      "restart_command": "",
+      "database_id": null,
+      "database_connection_string": null,
+      "database_schema_overview": null
+    },
+    "database": null,
+    "keys": [
+      {
+        "key_name": "OpenAI API Key",
+        "env_var": "OPENAI_API_KEY",
+        "description": "API key for OpenAI services (required for AI features)"
+      }
+    ],
+    "requested_port": 5020,
+    "auto_assign_port": false,
+    "auto_create_db": false,
+    "meta": {
+      "source": "ai-services",
+      "created_date": "2026-02-17"
+    }
+  },
+  {
+    "service": {
+      "name": "Forensic CPA AI",
+      "description": "AI-powered forensic accounting service for fraud detection and financial analysis",
+      "category": "ai-services",
+      "tags": ["ai", "forensic", "accounting", "fraud-detection", "fastapi"],
+      "tech_stack": ["python", "fastapi", "uvicorn"],
+      "dependencies": [],
+      "config_paths": ["/home/user/LocalProgramControlCenter/Forensic_CPA_AI/.env"],
+      "port": 5021,
+      "local_url": "http://127.0.0.1:5021",
+      "healthcheck_url": "http://127.0.0.1:5021/health",
+      "working_directory": "/home/user/LocalProgramControlCenter/Forensic_CPA_AI",
+      "start_command": "uvicorn app.main:app --host {HOST} --port {PORT}",
+      "stop_command": "",
+      "restart_command": "",
+      "database_id": null,
+      "database_connection_string": null,
+      "database_schema_overview": null
+    },
+    "database": null,
+    "keys": [
+      {
+        "key_name": "OpenAI API Key",
+        "env_var": "OPENAI_API_KEY",
+        "description": "API key for OpenAI services (required for AI features)"
+      }
+    ],
+    "requested_port": 5021,
+    "auto_assign_port": false,
+    "auto_create_db": false,
+    "meta": {
+      "source": "ai-services",
+      "created_date": "2026-02-17"
+    }
+  }
+]
