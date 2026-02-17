@@ -35,6 +35,12 @@
       "name": "DocumentPresentationResearch_Assistant",
       "expected_branch": "main",
       "expected_origin": "https://github.com/nedpearson/DocumentPresentationResearch_Assistant.git"
+    },
+    {
+      "path": "C:/Users/nedpe/Forensic_CPA_AI",
+      "name": "Forensic_CPA_AI",
+      "expected_branch": "main",
+      "expected_origin": "https://github.com/nedpearson/Forensic_CPA_AI.git"
     }
   ]
 }
