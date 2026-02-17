@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forensic CPA AI - Document Processing</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .upload-area {
+            border: 2px dashed #667eea;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: #f8f9ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #764ba2;
+            background: #f8f9ff;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .file-info {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+
+        .results {
+            margin-top: 20px;
+        }
+
+        .result-item {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .result-item h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .success {
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        .error {
+            color: #ef4444;
+            font-weight: bold;
+        }
+
+        pre {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            max-height: 400px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            background: #667eea;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-box .number {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .stat-box .label {
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Forensic CPA AI</h1>
+            <p>Document Analysis & Processing System</p>
+        </div>
+
+        <div class="card">
+            <h2>Upload Document</h2>
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📄</div>
+                <p><strong>Click to upload</strong> or drag and drop</p>
+                <p style="margin-top: 10px; opacity: 0.7;">Supports PDF, Excel (.xlsx, .xls), and Word (.docx, .doc)</p>
+                <input type="file" id="fileInput" accept=".pdf,.xlsx,.xls,.docx,.doc">
+            </div>
+
+            <div id="fileInfo" class="file-info hidden">
+                <strong>Selected file:</strong> <span id="fileName"></span>
+            </div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn" id="uploadBtn" disabled>Upload & Process</button>
+            </div>
+        </div>
+
+        <div id="loadingDiv" class="card hidden">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Processing document...</p>
+            </div>
+        </div>
+
+        <div id="resultsDiv" class="card hidden">
+            <h2>Analysis Results</h2>
+            <div id="resultsContent"></div>
+        </div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const loadingDiv = document.getElementById('loadingDiv');
+        const resultsDiv = document.getElementById('resultsDiv');
+        const resultsContent = document.getElementById('resultsContent');
+
+        let selectedFile = null;
+
+        // Click to upload
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        // File selection
+        fileInput.addEventListener('change', (e) => {
+            handleFile(e.target.files[0]);
+        });
+
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            handleFile(e.dataTransfer.files[0]);
+        });
+
+        function handleFile(file) {
+            if (!file) return;
+
+            selectedFile = file;
+            fileName.textContent = file.name;
+            fileInfo.classList.remove('hidden');
+            uploadBtn.disabled = false;
+        }
+
+        // Upload and process
+        uploadBtn.addEventListener('click', async () => {
+            if (!selectedFile) return;
+
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            uploadBtn.disabled = true;
+            loadingDiv.classList.remove('hidden');
+            resultsDiv.classList.add('hidden');
+
+            try {
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    displayResults(data);
+                } else {
+                    displayError(data.error || 'Upload failed');
+                }
+            } catch (error) {
+                displayError('Error: ' + error.message);
+            } finally {
+                loadingDiv.classList.add('hidden');
+                uploadBtn.disabled = false;
+            }
+        });
+
+        function displayResults(data) {
+            resultsDiv.classList.remove('hidden');
+
+            let html = '<div class="success">✓ Document processed successfully!</div>';
+
+            html += '<div class="stats">';
+            html += `<div class="stat-box">
+                        <div class="number">${data.file_type.toUpperCase()}</div>
+                        <div class="label">File Type</div>
+                     </div>`;
+
+            const results = data.results;
+
+            if (results.metadata) {
+                if (results.metadata.pages) {
+                    html += `<div class="stat-box">
+                                <div class="number">${results.metadata.pages}</div>
+                                <div class="label">Pages</div>
+                             </div>`;
+                }
+                if (results.metadata.sheet_count) {
+                    html += `<div class="stat-box">
+                                <div class="number">${results.metadata.sheet_count}</div>
+                                <div class="label">Sheets</div>
+                             </div>`;
+                }
+            }
+
+            if (results.text) {
+                html += `<div class="stat-box">
+                            <div class="number">${results.text.length}</div>
+                            <div class="label">Text Sections</div>
+                         </div>`;
+            }
+
+            if (results.tables) {
+                html += `<div class="stat-box">
+                            <div class="number">${results.tables.length}</div>
+                            <div class="label">Tables</div>
+                         </div>`;
+            }
+
+            html += '</div>';
+
+            html += '<div class="result-item">';
+            html += '<h3>Full Results</h3>';
+            html += '<pre>' + JSON.stringify(results, null, 2) + '</pre>';
+            html += '</div>';
+
+            resultsContent.innerHTML = html;
+        }
+
+        function displayError(message) {
+            resultsDiv.classList.remove('hidden');
+            resultsContent.innerHTML = `<div class="error">✗ ${message}</div>`;
+        }
+    </script>
+</body>
+</html>

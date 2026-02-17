@@ -1,0 +1,44 @@
+[
+  {
+    "service": {
+      "name": "Forensic CPA AI",
+      "description": "Document processing system for forensic accounting. Extracts and analyzes data from PDF, Excel, and Word documents.",
+      "category": "services",
+      "tags": ["python", "flask", "forensic", "accounting", "document-processing"],
+      "tech_stack": ["python", "flask"],
+      "dependencies": [],
+      "config_paths": ["C:/Users/nedpe/Desktop/Repositories/Forensic_CPA_AI/.env"],
+      "port": 5000,
+      "local_url": "http://127.0.0.1:5000",
+      "healthcheck_url": "http://127.0.0.1:5000/health",
+      "working_directory": "C:/Users/nedpe/Desktop/Repositories/Forensic_CPA_AI",
+      "start_command": "python main.py",
+      "stop_command": "",
+      "restart_command": "",
+      "database_id": null,
+      "database_connection_string": null,
+      "database_schema_overview": null
+    },
+    "database": null,
+    "keys": [
+      {
+        "key_name": "Port",
+        "env_var": "PORT",
+        "description": "Port number for the Flask application (default: 5000)"
+      },
+      {
+        "key_name": "Flask Debug",
+        "env_var": "FLASK_DEBUG",
+        "description": "Enable Flask debug mode (true/false)"
+      }
+    ],
+    "requested_port": 5000,
+    "auto_assign_port": false,
+    "auto_create_db": false,
+    "meta": {
+      "source": "forensic-cpa-ai",
+      "version": "1.0.0",
+      "created": "2026-02-17"
+    }
+  }
+]
