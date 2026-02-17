@@ -38,7 +38,7 @@ def get_default_port(program_type: str, existing_ports: set[int]) -> int:
     """Get a default port based on program type, avoiding conflicts."""
     base_ports = {
         "nodejs": 3000,
-        "python": 5000,
+        "python": 3000,
         "go": 8080,
         "rust": 8000,
         "java": 8080,
