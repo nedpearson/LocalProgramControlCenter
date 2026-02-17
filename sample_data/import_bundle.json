@@ -44,22 +44,26 @@
       "tech_stack": ["node", "react", "vite", "typescript"],
       "dependencies": ["Job Tracker (backend)"],
       "config_paths": ["C:/Users/nedpe/job-tracker/.env"],
-      "port": 5173,
-      "local_url": "http://127.0.0.1:5173",
-      "healthcheck_url": "http://127.0.0.1:5173",
+      "port": 3002,
+      "local_url": "http://127.0.0.1:3002",
+      "healthcheck_url": "http://127.0.0.1:3002",
       "working_directory": "C:/Users/nedpe/job-tracker",
-      "start_command": "npm run dev",
+      "start_command": "npm run dev -- --host {HOST} --port {PORT} --strictPort",
       "stop_command": "",
       "restart_command": "",
+      "env_overrides": {
+        "VITE_API_BASE_URL": "http://127.0.0.1:3001"
+      },
       "database_id": null,
       "database_connection_string": null,
       "database_schema_overview": null
     },
     "database": null,
     "keys": [
-      { "key_name": "Sentry DSN", "env_var": "SENTRY_DSN", "description": "Optional error reporting (frontend)" }
+      { "key_name": "Sentry DSN", "env_var": "SENTRY_DSN", "description": "Optional error reporting (frontend)" },
+      { "key_name": "Backend API URL", "env_var": "VITE_API_BASE_URL", "description": "Job Tracker backend API endpoint (auto-configured)" }
     ],
-    "requested_port": 5173,
+    "requested_port": 3002,
     "auto_assign_port": false,
     "auto_create_db": false,
     "meta": { "seed": true }
