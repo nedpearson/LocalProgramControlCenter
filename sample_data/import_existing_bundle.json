@@ -104,9 +104,9 @@
       "tech_stack": ["nodejs", "nextjs", "typescript", "tailwind", "prisma", "postgres"],
       "dependencies": [],
       "config_paths": ["C:/Users/nedpe/job-tracker/.env"],
-      "port": 3000,
-      "local_url": "http://127.0.0.1:3000",
-      "healthcheck_url": "http://127.0.0.1:3000/api/version",
+      "port": 3002,
+      "local_url": "http://127.0.0.1:3002",
+      "healthcheck_url": "http://127.0.0.1:3002/api/version",
       "working_directory": "C:/Users/nedpe/job-tracker",
       "start_command": "npm run dev -- -p {PORT}",
       "stop_command": "",
@@ -139,7 +139,7 @@
       { "key_name": "PG password", "env_var": "PGPASSWORD", "description": "Optional alternative DB config (Railway-style)" },
       { "key_name": "PG database", "env_var": "PGDATABASE", "description": "Optional alternative DB config (Railway-style)" }
     ],
-    "requested_port": 3000,
+    "requested_port": 3002,
     "auto_assign_port": false,
     "auto_create_db": true,
     "meta": { "source": "C:/Users/nedpe/job-tracker" }

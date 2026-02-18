@@ -1033,9 +1033,11 @@ def github_localize_pr(req: GitHubLocalizePrRequest) -> dict:
         if not str(svc.get("working_directory") or "").strip():
             svc["working_directory"] = "{REPO_ROOT}"
         if not str(svc.get("start_command") or "").strip():
-            svc["start_command"] = f"powershell -ExecutionPolicy Bypass -File {start_ps1_path.replace('/', '\\\\')}"
+            win_start = start_ps1_path.replace("/", "\\")
+            svc["start_command"] = f"powershell -ExecutionPolicy Bypass -File {win_start}"
         if not str(svc.get("stop_command") or "").strip():
-            svc["stop_command"] = f"powershell -ExecutionPolicy Bypass -File {stop_ps1_path.replace('/', '\\\\')}"
+            win_stop = stop_ps1_path.replace("/", "\\")
+            svc["stop_command"] = f"powershell -ExecutionPolicy Bypass -File {win_stop}"
 
         tech = svc.get("tech_stack")
         if not isinstance(tech, list):

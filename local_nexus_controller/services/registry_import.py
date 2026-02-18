@@ -12,7 +12,7 @@ from local_nexus_controller.models import (
     KeyRef,
     Service,
 )
-from local_nexus_controller.services.ports import is_port_in_use, next_available_port
+from local_nexus_controller.services.ports import is_controller_port, is_port_in_use, next_available_port, reserved_ports
 
 
 def _now_utc() -> datetime:
@@ -75,27 +75,60 @@ def import_bundle(session: Session, bundle: ImportBundle, host_for_port_checks: 
         db = _upsert_database(session, bundle.database)
         database_id = db.id
 
-    # Port assignment
+    # Port assignment with automatic conflict resolution
     port: int | None = bundle.service.port
     if bundle.requested_port is not None:
         port = int(bundle.requested_port)
+
+    # Resolve port conflicts automatically instead of silently allowing them
+    if port is not None:
+        needs_reassign = False
+
+        # Never allow a service to use the controller's own port
+        if is_controller_port(port):
+            warnings.append(f"Port {port} is the Nexus Controller port; auto-reassigning.")
+            needs_reassign = True
+
+        # Check if another service already has this port
+        if not needs_reassign:
+            conflicting = session.exec(
+                select(Service).where(Service.port == int(port), Service.name != bundle.service.name)
+            ).first()
+            if conflicting:
+                warnings.append(f"Port {port} already reserved by '{conflicting.name}'; auto-reassigning.")
+                needs_reassign = True
+
+        # Check if the port is physically in use by something else
+        if not needs_reassign and is_port_in_use(host_for_port_checks, port):
+            warnings.append(f"Port {port} in use on {host_for_port_checks}; auto-reassigning.")
+            needs_reassign = True
+
+        if needs_reassign:
+            old_port = port
+            port = next_available_port(session, host=host_for_port_checks)
+            warnings.append(f"Reassigned from port {old_port} to {port}.")
+
     if port is None and bundle.auto_assign_port:
         port = next_available_port(session, host=host_for_port_checks)
-
-    # Check conflicts
-    if port is not None:
-        # Only warn if the port is reserved by a *different* service.
-        conflicting = session.exec(
-            select(Service).where(Service.port == int(port), Service.name != bundle.service.name)
-        ).first()
-        if conflicting:
-            warnings.append(f"Port {port} is already reserved in the registry (by '{conflicting.name}').")
-        if is_port_in_use(host_for_port_checks, port):
-            warnings.append(f"Port {port} appears to be in use on {host_for_port_checks}.")
 
     # Upsert service
     svc_dict = bundle.service.model_dump()  # type: ignore[attr-defined]
     svc_dict["port"] = port
+
+    # Auto-populate local_url from port when missing
+    if not svc_dict.get("local_url") and port is not None:
+        svc_dict["local_url"] = f"http://127.0.0.1:{port}"
+    # If port changed from what was in the bundle, update local_url to match
+    elif svc_dict.get("local_url") and bundle.service.port is not None and port != bundle.service.port:
+        old_port_str = f":{bundle.service.port}"
+        if old_port_str in svc_dict["local_url"]:
+            svc_dict["local_url"] = svc_dict["local_url"].replace(old_port_str, f":{port}")
+    # Same for healthcheck_url
+    if svc_dict.get("healthcheck_url") and bundle.service.port is not None and port != bundle.service.port:
+        old_port_str = f":{bundle.service.port}"
+        if old_port_str in svc_dict["healthcheck_url"]:
+            svc_dict["healthcheck_url"] = svc_dict["healthcheck_url"].replace(old_port_str, f":{port}")
+
     if database_id is not None:
         svc_dict["database_id"] = database_id
     svc_dict.setdefault("status", "stopped")

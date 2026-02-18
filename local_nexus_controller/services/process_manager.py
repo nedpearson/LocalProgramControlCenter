@@ -10,7 +10,7 @@ from sqlmodel import Session
 
 from local_nexus_controller.models import Service
 from local_nexus_controller.settings import settings
-from local_nexus_controller.services.ports import is_port_in_use, next_available_port
+from local_nexus_controller.services.ports import is_controller_port, is_port_in_use, next_available_port
 
 
 def _now_utc() -> datetime:
@@ -59,18 +59,22 @@ def start_service(session: Session, service: Service) -> Service:
     if service.status == "running":
         return service
 
-    # Self-heal: if the reserved port is currently in use, reassign.
-    if service.port is not None and is_port_in_use("127.0.0.1", int(service.port)) and service.status != "running":
-        old_port = int(service.port)
-        new_port = next_available_port(session, host="127.0.0.1")
-        service.port = new_port
-        if service.local_url and f":{old_port}" in service.local_url:
-            service.local_url = service.local_url.replace(f":{old_port}", f":{new_port}")
-        if service.healthcheck_url and f":{old_port}" in service.healthcheck_url:
-            service.healthcheck_url = service.healthcheck_url.replace(f":{old_port}", f":{new_port}")
-        session.add(service)
-        session.commit()
-        session.refresh(service)
+    # Self-heal: reassign port if it conflicts with the controller or is already in use.
+    if service.port is not None:
+        needs_reassign = is_controller_port(int(service.port))
+        if not needs_reassign and is_port_in_use("127.0.0.1", int(service.port)) and service.status != "running":
+            needs_reassign = True
+        if needs_reassign:
+            old_port = int(service.port)
+            new_port = next_available_port(session, host="127.0.0.1")
+            service.port = new_port
+            if service.local_url and f":{old_port}" in service.local_url:
+                service.local_url = service.local_url.replace(f":{old_port}", f":{new_port}")
+            if service.healthcheck_url and f":{old_port}" in service.healthcheck_url:
+                service.healthcheck_url = service.healthcheck_url.replace(f":{old_port}", f":{new_port}")
+            session.add(service)
+            session.commit()
+            session.refresh(service)
 
     log_path = _service_log_path(service)
     log_path.parent.mkdir(parents=True, exist_ok=True)

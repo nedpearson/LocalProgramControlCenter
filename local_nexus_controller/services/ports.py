@@ -22,12 +22,24 @@ def is_port_in_use(host: str, port: int, timeout_s: float = 0.25) -> bool:
         return False
 
 
+def controller_port() -> int:
+    """Return the port the Nexus Controller itself is running on."""
+    return settings.port
+
+
 def reserved_ports(session: Session) -> set[int]:
     ports: set[int] = set()
+    # Always reserve the controller's own port so no service collides with it.
+    ports.add(controller_port())
     for p in session.exec(select(Service.port).where(Service.port.is_not(None))):
         if p is not None:
             ports.add(int(p))
     return ports
+
+
+def is_controller_port(port: int) -> bool:
+    """Check if a port is the Nexus Controller's own port."""
+    return port == controller_port()
 
 
 def next_available_port(

@@ -6,7 +6,7 @@ from sqlmodel import Session, select
 from local_nexus_controller.db import get_session
 from local_nexus_controller.models import Service
 from local_nexus_controller.security import require_token
-from local_nexus_controller.services.ports import is_port_in_use, next_available_port, port_map
+from local_nexus_controller.services.ports import is_controller_port, is_port_in_use, next_available_port, port_map
 
 
 router = APIRouter()
@@ -99,30 +99,39 @@ def resolve_conflicts(
     # Re-load after commits so subsequent checks see updated ports
     services = list(session.exec(select(Service).order_by(Service.created_at)))
 
-    # 2) Resolve "port in use but service not running" conflicts
+    # 2) Resolve controller-port collisions and "port in use but service not running" conflicts
     for svc in services:
         if svc.port is None:
             continue
         port = int(svc.port)
-        if svc.status == "running" and svc.process_pid is not None:
-            continue
-        if is_port_in_use(host, port):
+        if is_controller_port(port) or (
+            is_port_in_use(host, port) and not (svc.status == "running" and svc.process_pid is not None)
+        ):
             old_port = port
             new_port = next_available_port(session, host=host)
             svc.port = new_port
             _update_urls(svc, old_port=old_port, new_port=new_port)
             session.add(svc)
+            reason = "controller_port_collision" if is_controller_port(old_port) else "port_in_use_on_host"
             changes.append(
                 {
                     "service_id": svc.id,
                     "name": svc.name,
-                    "reason": "port_in_use_on_host",
+                    "reason": reason,
                     "old_port": old_port,
                     "new_port": new_port,
                     "local_url": svc.local_url,
                 }
             )
 
+    session.commit()
+
+    # 2b) Auto-populate local_url for services that have a port but no URL
+    services = list(session.exec(select(Service).order_by(Service.created_at)))
+    for svc in services:
+        if svc.port is not None and not svc.local_url:
+            svc.local_url = f"http://{host}:{svc.port}"
+            session.add(svc)
     session.commit()
 
     # 3) Update dependent Vite apps: VITE_API_BASE_URL -> dependency local_url
