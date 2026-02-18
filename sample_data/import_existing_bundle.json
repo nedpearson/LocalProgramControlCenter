@@ -170,6 +170,33 @@
     "auto_assign_port": false,
     "auto_create_db": false,
     "meta": { "source": "C:/Users/nedpe/Documents/PearsonNexusAI/prototype" }
+  },
+  {
+    "service": {
+      "name": "Document Intelligence",
+      "description": "Document Presentation Research Assistant for AI-powered document analysis, presentation generation, and research summarization.",
+      "category": "apps",
+      "tags": ["document", "ai", "research", "assistant"],
+      "tech_stack": ["python"],
+      "dependencies": [],
+      "config_paths": ["C:/Users/nedpe/DocumentPresentationResearch_Assistant/.env"],
+      "port": 8501,
+      "local_url": "http://127.0.0.1:8501",
+      "healthcheck_url": "http://127.0.0.1:8501",
+      "working_directory": "C:/Users/nedpe/DocumentPresentationResearch_Assistant",
+      "start_command": "streamlit run app.py --server.port {PORT} --server.address {HOST}",
+      "stop_command": "",
+      "restart_command": "",
+      "database_id": null,
+      "database_connection_string": null,
+      "database_schema_overview": null
+    },
+    "database": null,
+    "keys": [],
+    "requested_port": 8501,
+    "auto_assign_port": false,
+    "auto_create_db": false,
+    "meta": { "source": "C:/Users/nedpe/DocumentPresentationResearch_Assistant" }
   }
 ]
 

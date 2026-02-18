@@ -57,6 +57,8 @@
           <td class="px-4 py-3">
             {% if s.local_url %}
               <a class="underline text-blue-400 hover:text-blue-300" href="{{ s.local_url }}" target="_blank">Open →</a>
+            {% elif s.port %}
+              <a class="underline text-blue-400 hover:text-blue-300" href="http://127.0.0.1:{{ s.port }}" target="_blank">Open →</a>
             {% else %}
               <span class="text-slate-500">—</span>
             {% endif %}
@@ -65,8 +67,10 @@
             <div class="flex flex-wrap gap-2">
               {% if s.local_url %}
                 <a href="{{ s.local_url }}" target="_blank" class="btn bg-blue-600 hover:bg-blue-700 border-blue-600 text-xs px-2 py-1">Launch</a>
+              {% elif s.port %}
+                <a href="http://127.0.0.1:{{ s.port }}" target="_blank" class="btn bg-blue-600 hover:bg-blue-700 border-blue-600 text-xs px-2 py-1">Launch</a>
               {% endif %}
-              <button class="btn text-xs px-2 py-1" onclick="lncServiceAction('{{ s.id }}','start')">Start</button>
+              <button class="btn text-xs px-2 py-1" onclick="lncServiceAction('{{ s.id }}','start', true)">Start</button>
               <button class="btn text-xs px-2 py-1" onclick="lncServiceAction('{{ s.id }}','stop')">Stop</button>
               <button class="btn text-xs px-2 py-1" onclick="lncServiceAction('{{ s.id }}','restart')">Restart</button>
               <button class="btn bg-rose-900 hover:bg-rose-800 border-rose-800 text-xs px-2 py-1" style="display: inline-block !important; visibility: visible !important;" onclick="lncDeleteService('{{ s.id }}')">Delete</button>
